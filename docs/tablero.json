@@ -1,0 +1,74 @@
+{
+  "repo": "JulianReneMunoz/neumonia-maas",
+  "owner": "JulianReneMunoz",
+  "project_number": 6,
+  "project_id": "PVT_kwHOBo6KNc4BropS",
+  "integrantes": 1,
+  "fields": {
+    "Title": {
+      "id": "PVTF_lAHOBo6KNc4BropSzhp6cgM",
+      "options": {}
+    },
+    "Assignees": {
+      "id": "PVTF_lAHOBo6KNc4BropSzhp6cgY",
+      "options": {}
+    },
+    "Status": {
+      "id": "PVTSSF_lAHOBo6KNc4BropSzhp6cgk",
+      "options": {
+        "Backlog": "0c72ae09",
+        "In Progress": "97e6e153",
+        "In Review": "dc74d63e",
+        "Done": "05494442"
+      }
+    },
+    "Labels": {
+      "id": "PVTF_lAHOBo6KNc4BropSzhp6cg4",
+      "options": {}
+    },
+    "Linked pull requests": {
+      "id": "PVTF_lAHOBo6KNc4BropSzhp6chE",
+      "options": {}
+    },
+    "Milestone": {
+      "id": "PVTF_lAHOBo6KNc4BropSzhp6chQ",
+      "options": {}
+    },
+    "Repository": {
+      "id": "PVTF_lAHOBo6KNc4BropSzhp6chc",
+      "options": {}
+    },
+    "Reviewers": {
+      "id": "PVTF_lAHOBo6KNc4BropSzhp6ch0",
+      "options": {}
+    },
+    "Parent issue": {
+      "id": "PVTF_lAHOBo6KNc4BropSzhp6ch8",
+      "options": {}
+    },
+    "Sub-issues progress": {
+      "id": "PVTF_lAHOBo6KNc4BropSzhp6ciE",
+      "options": {}
+    },
+    "Created": {
+      "id": "PVTF_lAHOBo6KNc4BropSzhp6ciM",
+      "options": {}
+    },
+    "Updated": {
+      "id": "PVTF_lAHOBo6KNc4BropSzhp6ciQ",
+      "options": {}
+    },
+    "Closed": {
+      "id": "PVTF_lAHOBo6KNc4BropSzhp6ciU",
+      "options": {}
+    },
+    "Puntos": {
+      "id": "PVTF_lAHOBo6KNc4BropSzhp6cjU",
+      "options": {}
+    },
+    "Inicio": {
+      "id": "PVTF_lAHOBo6KNc4BropSzhp6ckQ",
+      "options": {}
+    }
+  }
+}
