@@ -1,0 +1,43 @@
+name: Historia de usuario
+description: Una historia con criterios Given-When-Then, puntos Fibonacci y su spec SDD
+title: "SPEC-NNN · "
+labels: []
+body:
+  - type: textarea
+    id: historia
+    attributes:
+      label: Historia
+      description: Formato Como / quiero / para.
+      placeholder: "Como médico, quiero ... para ..."
+    validations:
+      required: true
+  - type: textarea
+    id: ac
+    attributes:
+      label: Criterios de aceptación (Given-When-Then)
+      placeholder: |
+        AC-1
+        - Dado ...
+        - Cuando ...
+        - Entonces ...
+    validations:
+      required: true
+  - type: dropdown
+    id: puntos
+    attributes:
+      label: Estimación (Fibonacci)
+      options: ["1", "2", "3", "5", "8"]
+    validations:
+      required: true
+  - type: input
+    id: spec
+    attributes:
+      label: Ruta de la spec SDD
+      placeholder: specs/NNN-slug/
+    validations:
+      required: true
+  - type: textarea
+    id: dependencias
+    attributes:
+      label: Dependencias
+      placeholder: SPEC-001, SPEC-004 (o ninguna)

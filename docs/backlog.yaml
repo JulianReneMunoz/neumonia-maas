@@ -1,0 +1,1080 @@
+# Backlog del proyecto — Neumonía MaaS (GPIA · UAO 2026-2S)
+#
+# Fuente única de verdad para issues, tarjetas del Kanban y specs SDD.
+# Regla 1:1  →  HU-NNN (issue)  ↔  SPEC-NNN (specs/NNN-slug/)  ↔  1 PR.
+# Puntos: Fibonacci (1, 2, 3, 5, 8), una estimación por historia.
+# "pruebas" es el piso de pruebas pytest que debe añadir la historia (suma ≥ 120).
+# "dia" es el bloque del plan (docs/plan-semana.md): 1=sáb 14 noche, 2=dom 15, 3=lun 16, 4=mar 17, 5=mié 18, 6=después del 19/11 (M4).
+
+proyecto:
+  nombre: "neumonia-maas"
+  descripcion: >-
+    Servicio de apoyo a la lectura de radiografías de tórax: un cliente web
+    desacoplado (React) envía la imagen a una API FastAPI, que clasifica
+    NORMAL / PNEUMONIA con un modelo preentrenado de Hugging Face Hub.
+  modelo:
+    id: lxyuan/vit-xray-pneumonia-classification
+    revision: "PENDIENTE — fijar el commit SHA en SPEC-005"
+    licencia: Apache-2.0
+    tarea: "image-classification (NORMAL, PNEUMONIA)"
+  milestones:
+    M3: "Sustentación M3 — servicio local E2E, Kanban, MLflow y SDD"
+    M4: "Sustentación M4 — CI/CD con compuertas y despliegue (provisional)"
+
+historias:
+  # ───────────────────────── DÍA 1 · Cimientos ─────────────────────────
+  - id: SPEC-001
+    slug: esqueleto-uv
+    titulo: "Esqueleto del proyecto con uv y Python 3.13"
+    capa: infra
+    labels: [infra]
+    milestone: M3
+    puntos: 2
+    dia: 1
+    depende: []
+    pruebas: 3
+    como: "desarrollador del proyecto"
+    quiero: "un proyecto uv con Python 3.13, ruff y pytest listos"
+    para: "que cualquiera lo instale con `uv sync` en una máquina limpia"
+    criterios:
+      - dado: "un clon limpio del repositorio"
+        cuando: "ejecuto `uv sync` y `uv run pytest -q`"
+        entonces: "se instalan las dependencias desde uv.lock y las pruebas pasan"
+      - dado: "el proyecto recién instalado"
+        cuando: "ejecuto `uv run ruff check .` y `uv run ruff format --check .`"
+        entonces: "no hay errores"
+      - dado: "el Makefile"
+        cuando: "ejecuto `make check`"
+        entonces: "corre ruff + pytest y termina en verde"
+    notas: >-
+      Layout src/neumonia/ (paquete) y tests/. pyproject con build-backend uv_build,
+      .python-version = 3.13, grupo dev (pytest, pytest-cov, ruff). neumonia.__version__.
+      Configurar ruff (E, F, I, UP, B, D con convención google, ANN) y pytest
+      (testpaths, -q, filterwarnings=error). Prohibido pip y requirements.txt.
+
+  - id: SPEC-002
+    slug: ci-github-actions
+    titulo: "Integración continua con GitHub Actions (ruff + pytest)"
+    capa: infra
+    labels: [infra, qa]
+    milestone: M3
+    puntos: 2
+    dia: 1
+    depende: [SPEC-001]
+    pruebas: 2
+    como: "revisor de código"
+    quiero: "que cada PR ejecute ruff y pytest automáticamente"
+    para: "no fusionar código que rompe la calidad"
+    criterios:
+      - dado: "una PR hacia develop o main"
+        cuando: "se abre o se actualiza"
+        entonces: "el workflow CI instala con uv (Python 3.13) y corre ruff y pytest"
+      - dado: "una prueba que falla"
+        cuando: "corre el workflow"
+        entonces: "el check queda en rojo y la PR no se puede fusionar"
+    notas: >-
+      .github/workflows/ci.yml con astral-sh/setup-uv, cache de uv, `uv sync --locked`.
+      El job se llama `ci` (la protección de ramas exige ese nombre). Pruebas: el YAML parsea y contiene los pasos ruff y pytest.
+      Después de fusionar: exigir el check en la protección de develop y main.
+
+  - id: SPEC-003
+    slug: plantillas-issue-contribuir
+    titulo: "Plantillas de historia de usuario y guía de contribución"
+    capa: kanban
+    labels: [kanban, docs]
+    milestone: M3
+    puntos: 1
+    dia: 1
+    depende: [SPEC-001]
+    pruebas: 0
+    como: "integrante del equipo"
+    quiero: "una plantilla de issue para historias y un CONTRIBUTING con el flujo"
+    para: "que toda tarjeta tenga Como/quiero/para, AC Given-When-Then, puntos y spec"
+    criterios:
+      - dado: "el botón «New issue»"
+        cuando: "elijo «Historia de usuario»"
+        entonces: "el formulario exige historia, AC, puntos Fibonacci y ruta de la spec"
+      - dado: "CONTRIBUTING.md"
+        cuando: "lo leo"
+        entonces: "describe el flujo Backlog → spec → rama → PR → review → merge → Done, los WIP limits y la DoD"
+    notas: ".github/ISSUE_TEMPLATE/historia.yml (issue form), bug.yml y config.yml."
+
+  # ───────────────────────── DÍA 2 · Inferencia y servicio ─────────────────────────
+  - id: SPEC-004
+    slug: configuracion-tipada
+    titulo: "Configuración tipada con pydantic-settings"
+    capa: backend
+    labels: [backend]
+    milestone: M3
+    puntos: 2
+    dia: 1
+    depende: [SPEC-001]
+    pruebas: 5
+    como: "operador del servicio"
+    quiero: "configurar modelo, revisión, umbral, tamaño máximo y CORS por variables de entorno"
+    para: "cambiar el comportamiento sin tocar código"
+    criterios:
+      - dado: "sin variables de entorno"
+        cuando: "cargo Settings"
+        entonces: "obtengo los valores por defecto documentados (umbral 0.5, 10 MB, modelo lxyuan@rev)"
+      - dado: "NEUMONIA_THRESHOLD=1.5"
+        cuando: "cargo Settings"
+        entonces: "falla la validación con un mensaje claro (rango 0–1)"
+      - dado: "un archivo .env.example"
+        cuando: "lo reviso"
+        entonces: "documenta todas las variables y no contiene secretos"
+    notas: "src/neumonia/config.py, prefijo NEUMONIA_, get_settings() con lru_cache."
+
+  - id: SPEC-005
+    slug: contrato-clasificador-carga
+    titulo: "Contrato del clasificador y carga única del modelo MaaS"
+    capa: inferencia
+    labels: [backend, inferencia]
+    milestone: M3
+    puntos: 5
+    dia: 2
+    depende: [SPEC-004]
+    pruebas: 6
+    como: "desarrollador del backend"
+    quiero: "una interfaz Classifier y una estrategia ViT que cargue el modelo de HF una sola vez"
+    para: "desacoplar el servicio del modelo concreto y poder cambiarlo (Estrategia + DIP)"
+    criterios:
+      - dado: "el modelo lxyuan/vit-xray-pneumonia-classification fijado a una revisión (commit SHA)"
+        cuando: "se construye ViTClassifier"
+        entonces: "carga AutoImageProcessor y AutoModelForImageClassification con esa revisión, una sola vez"
+      - dado: "un clasificador falso que cumple el Protocol"
+        cuando: "el resto del código lo usa"
+        entonces: "funciona sin importar torch ni transformers (las pruebas no usan red)"
+      - dado: '`uv run python scripts/descargar_modelo.py`'
+        cuando: "lo ejecuto con red"
+        entonces: "descarga los pesos a la caché de HF, imprime org/modelo@rev y nada binario entra a Git"
+    notas: >-
+      src/neumonia/inference/{base.py,vit.py}. Import perezoso de torch/transformers.
+      torch CPU vía índice explícito de uv (download.pytorch.org/whl/cpu).
+      Obtener el SHA con huggingface_hub.model_info(...).sha y fijarlo en config y backlog.
+      La capa de inferencia NO importa FastAPI.
+
+  - id: SPEC-006
+    slug: preprocesamiento
+    titulo: "Preprocesamiento separado y configurable (RGB, tamaño, CLAHE opcional)"
+    capa: inferencia
+    labels: [inferencia]
+    milestone: M3
+    puntos: 3
+    dia: 2
+    depende: [SPEC-005]
+    pruebas: 10
+    como: "científico de datos"
+    quiero: "un preprocesamiento explícito y probado antes del processor de HF"
+    para: "controlar qué recibe el modelo y comparar variantes en MLflow"
+    criterios:
+      - dado: "una imagen en escala de grises, RGBA o RGB"
+        cuando: "la preproceso"
+        entonces: "obtengo una imagen RGB 8 bits sin canal alfa"
+      - dado: "la opción CLAHE activada"
+        cuando: "preproceso una imagen de bajo contraste"
+        entonces: "aumenta el contraste local y el tamaño se conserva"
+      - dado: "la misma imagen y configuración"
+        cuando: "preproceso dos veces"
+        entonces: "el resultado es idéntico (determinista)"
+    notas: "src/neumonia/inference/preprocess.py; funciones puras con numpy/Pillow (opencv-python-headless para CLAHE)."
+
+  - id: SPEC-007
+    slug: postprocesamiento-umbral
+    titulo: "Postprocesamiento y umbral de decisión configurable"
+    capa: inferencia
+    labels: [inferencia]
+    milestone: M3
+    puntos: 2
+    dia: 2
+    depende: [SPEC-005]
+    pruebas: 6
+    como: "médico que usa la herramienta"
+    quiero: "una etiqueta, una probabilidad de neumonía y el umbral usado"
+    para: "entender por qué el sistema decidió"
+    criterios:
+      - dado: "logits del modelo"
+        cuando: "postproceso"
+        entonces: "obtengo probabilidades que suman 1 mapeadas con id2label"
+      - dado: "p(PNEUMONIA)=0.40 y umbral 0.35"
+        cuando: "decido"
+        entonces: "la etiqueta es PNEUMONIA; con umbral 0.5 es NORMAL"
+      - dado: "un id2label sin la clase PNEUMONIA"
+        cuando: "postproceso"
+        entonces: "se lanza un error de configuración explícito"
+    notas: "src/neumonia/inference/postprocess.py; dataclass Prediction(label, p_pneumonia, scores, threshold)."
+
+  - id: SPEC-008
+    slug: imagenes-invalidas-dicom
+    titulo: "Lectura segura de imágenes (PNG/JPEG/DICOM) y rechazo de inválidas"
+    capa: inferencia
+    labels: [inferencia]
+    milestone: M3
+    puntos: 3
+    dia: 2
+    depende: [SPEC-006]
+    pruebas: 6
+    como: "usuario que sube archivos"
+    quiero: "que se acepten PNG, JPEG y DICOM y se rechacen archivos corruptos o vacíos"
+    para: "obtener un error claro en lugar de un fallo del servidor"
+    criterios:
+      - dado: "bytes de un PNG, JPEG o DICOM válido"
+        cuando: "los decodifico"
+        entonces: "obtengo una imagen lista para preprocesar"
+      - dado: "bytes vacíos, texto o una imagen truncada"
+        cuando: "los decodifico"
+        entonces: "se lanza InvalidImageError con un motivo legible"
+      - dado: "una imagen de más de 50 megapíxeles"
+        cuando: "la decodifico"
+        entonces: "se rechaza (protección contra decompression bomb)"
+    notas: "pydicom para DICOM (aplicar VOI LUT, MONOCHROME1 invertida); DICOM sintético en pruebas."
+
+  - id: SPEC-009
+    slug: capa-servicio
+    titulo: "Capa de servicio DiagnosisService (orquestación y latencia)"
+    capa: backend
+    labels: [backend]
+    milestone: M3
+    puntos: 3
+    dia: 2
+    depende: [SPEC-007, SPEC-008]
+    pruebas: 6
+    como: "desarrollador del backend"
+    quiero: "un servicio que orqueste decodificar → preprocesar → inferir → postprocesar"
+    para: "que la API solo traduzca HTTP y la lógica sea probable sin servidor"
+    criterios:
+      - dado: "bytes de una imagen válida y un clasificador falso"
+        cuando: "llamo DiagnosisService.diagnose"
+        entonces: "devuelve un resultado tipado con etiqueta, probabilidad, umbral, latencia_ms y modelo@rev"
+      - dado: "bytes inválidos"
+        cuando: "llamo diagnose"
+        entonces: "propaga InvalidImageError (no un error genérico)"
+      - dado: "el módulo de servicio"
+        cuando: "reviso sus imports"
+        entonces: "no importa fastapi ni starlette"
+    notas: "src/neumonia/services/diagnosis.py; recibe el Classifier por inyección."
+
+  - id: SPEC-010
+    slug: app-fastapi-lifespan-health
+    titulo: "App FastAPI con lifespan (carga única) y /health"
+    capa: backend
+    labels: [backend]
+    milestone: M3
+    puntos: 3
+    dia: 2
+    depende: [SPEC-009]
+    pruebas: 4
+    como: "operador del servicio"
+    quiero: "que el modelo se cargue al arrancar y /health diga si está listo"
+    para: "saber si el servicio puede atender antes de enviar imágenes"
+    criterios:
+      - dado: "el servidor arrancando"
+        cuando: "termina el lifespan"
+        entonces: "el clasificador se cargó una sola vez y quedó en app.state"
+      - dado: "el modelo cargado"
+        cuando: "GET /health"
+        entonces: "200 con {status: ok, model_loaded: true, model: org/modelo@rev, version}"
+      - dado: "que la carga del modelo falló"
+        cuando: "GET /health"
+        entonces: "503 con status degraded"
+    notas: >-
+      src/neumonia/api/main.py con create_app(classifier_factory) para inyectar un falso en pruebas.
+      Arranque: `make backend` → uv run uvicorn neumonia.api.main:app --port 8000.
+
+  # ───────────────────────── DÍA 3 · API completa ─────────────────────────
+  - id: SPEC-011
+    slug: schemas-pydantic
+    titulo: "Schemas tipados de respuesta y error con Pydantic"
+    capa: backend
+    labels: [backend]
+    milestone: M3
+    puntos: 2
+    dia: 2
+    depende: [SPEC-010]
+    pruebas: 6
+    como: "consumidor de la API"
+    quiero: "un contrato explícito para predicción, salud, modelo y errores"
+    para: "generar el cliente y validar respuestas sin adivinar"
+    criterios:
+      - dado: "PredictionResponse"
+        cuando: "lo serializo"
+        entonces: "incluye label, p_pneumonia (0–1), scores, threshold, latency_ms, model, request_id"
+      - dado: "un error de la API"
+        cuando: "se serializa"
+        entonces: "sigue ErrorResponse {code, message, request_id} y nunca expone trazas"
+      - dado: "/docs"
+        cuando: "lo abro"
+        entonces: "los schemas aparecen con descripciones y ejemplos"
+    notas: "src/neumonia/api/schemas.py; Field con description y examples."
+
+  - id: SPEC-012
+    slug: endpoint-predict
+    titulo: "Endpoint POST /api/v1/predict (multipart)"
+    capa: backend
+    labels: [backend]
+    milestone: M3
+    puntos: 3
+    dia: 2
+    depende: [SPEC-011]
+    pruebas: 6
+    como: "frontend"
+    quiero: "enviar una imagen y recibir la predicción"
+    para: "mostrar el resultado al usuario"
+    criterios:
+      - dado: "un PNG válido en el campo `file`"
+        cuando: "POST /api/v1/predict"
+        entonces: "200 con PredictionResponse"
+      - dado: "el parámetro opcional threshold=0.35"
+        cuando: "POST /api/v1/predict"
+        entonces: "la decisión usa ese umbral y lo devuelve"
+      - dado: "la inferencia"
+        cuando: "se ejecuta"
+        entonces: "corre fuera del event loop (threadpool) para no bloquear /health"
+    notas: "El endpoint solo traduce HTTP ↔ servicio; cero lógica de modelo en api/."
+
+  - id: SPEC-013
+    slug: errores-http-limites
+    titulo: "Manejo de errores HTTP, límite de tamaño y timeout"
+    capa: backend
+    labels: [backend]
+    milestone: M3
+    puntos: 3
+    dia: 2
+    depende: [SPEC-012]
+    pruebas: 10
+    como: "consumidor de la API"
+    quiero: "códigos de estado correctos y mensajes claros"
+    para: "que el frontend muestre el error adecuado y reintente cuando tenga sentido"
+    criterios:
+      - dado: "un archivo que no es imagen"
+        cuando: "POST /predict"
+        entonces: "400 (o 415 si el content-type no es soportado) con ErrorResponse"
+      - dado: "un archivo mayor que NEUMONIA_MAX_UPLOAD_MB"
+        cuando: "POST /predict"
+        entonces: "413"
+      - dado: "falta el campo file o threshold fuera de rango"
+        cuando: "POST /predict"
+        entonces: "422"
+      - dado: "una inferencia que supera NEUMONIA_TIMEOUT_S o un error inesperado"
+        cuando: "POST /predict"
+        entonces: "504 o 500 sin traza; modelo no cargado → 503"
+    notas: "exception handlers centralizados en api/errors.py."
+
+  - id: SPEC-014
+    slug: cors-versionado
+    titulo: "CORS para el frontend y versionado de la API"
+    capa: backend
+    labels: [backend]
+    milestone: M3
+    puntos: 1
+    dia: 3
+    depende: [SPEC-012]
+    pruebas: 3
+    como: "frontend que corre en otro puerto"
+    quiero: "que la API permita mi origen y exponga su versión"
+    para: "consumirla desde el navegador sin errores de CORS"
+    criterios:
+      - dado: "origen http://localhost:5173 configurado"
+        cuando: "el navegador hace preflight"
+        entonces: "la respuesta incluye Access-Control-Allow-Origin para ese origen"
+      - dado: "un origen no permitido"
+        cuando: "hace preflight"
+        entonces: "no recibe el encabezado"
+      - dado: "GET /api/v1/version"
+        cuando: "lo llamo"
+        entonces: "devuelve versión de la app y de la API"
+    notas: "Rutas bajo el prefijo /api/v1; /health queda en la raíz."
+
+  - id: SPEC-015
+    slug: logging-estructurado
+    titulo: "Logging estructurado con request_id y latencia"
+    capa: backend
+    labels: [backend]
+    milestone: M3
+    puntos: 2
+    dia: 3
+    depende: [SPEC-012]
+    pruebas: 4
+    como: "operador"
+    quiero: "logs JSON por petición con request_id, ruta, estado y latencia"
+    para: "rastrear errores y medir el servicio"
+    criterios:
+      - dado: "cualquier petición"
+        cuando: "termina"
+        entonces: "se emite una línea JSON con request_id, method, path, status y duration_ms"
+      - dado: "un encabezado X-Request-ID entrante"
+        cuando: "se procesa"
+        entonces: "se reutiliza y se devuelve en la respuesta"
+      - dado: "una predicción"
+        cuando: "se registra"
+        entonces: "el log no contiene los bytes de la imagen ni datos del paciente"
+    notas: "middleware en api/middleware.py; logging estándar con formateador JSON."
+
+  - id: SPEC-016
+    slug: endpoint-modelo-metricas
+    titulo: "Endpoints /api/v1/model y /api/v1/metrics"
+    capa: backend
+    labels: [backend]
+    milestone: M3
+    puntos: 2
+    dia: 3
+    depende: [SPEC-015]
+    pruebas: 4
+    como: "usuario y evaluador"
+    quiero: "ver qué modelo responde y cómo rinde el servicio"
+    para: "verificar consistencia con MLflow y la Model Card"
+    criterios:
+      - dado: "GET /api/v1/model"
+        cuando: "lo llamo"
+        entonces: "devuelve org/modelo, revisión, licencia, labels, umbral y enlace a la Model Card"
+      - dado: "varias predicciones"
+        cuando: "GET /api/v1/metrics"
+        entonces: "devuelve conteo, errores, latencia media y p95 desde el arranque"
+    notas: "métricas en memoria (deque acotada); sin dependencias nuevas."
+
+  - id: SPEC-017
+    slug: fixtures-datos-sinteticos
+    titulo: "Fixtures compartidas y datos sintéticos (sin red ni GPU)"
+    capa: qa
+    labels: [qa]
+    milestone: M3
+    puntos: 2
+    dia: 3
+    depende: [SPEC-008]
+    pruebas: 5
+    como: "desarrollador"
+    quiero: "fixtures reutilizables de imágenes PNG/JPEG/DICOM sintéticas y un FakeClassifier"
+    para: "escribir pruebas rápidas, deterministas y sin red"
+    criterios:
+      - dado: "tests/conftest.py"
+        cuando: "una prueba pide png_bytes, dicom_bytes o fake_classifier"
+        entonces: "los obtiene sin tocar disco externo, red ni GPU"
+      - dado: "la suite"
+        cuando: "se ejecuta con la red bloqueada"
+        entonces: "pasa (marcador `network` excluido por defecto)"
+    notas: "refactorizar pruebas previas para usar las fixtures; pytest-socket opcional."
+
+  # ───────────────────────── DÍA 4 · Frontend desacoplado ─────────────────────────
+  - id: SPEC-018
+    slug: scaffold-frontend
+    titulo: "Frontend React + TypeScript con Vite y pnpm"
+    capa: frontend
+    labels: [frontend]
+    milestone: M3
+    puntos: 2
+    dia: 3
+    depende: [SPEC-014]
+    pruebas: 0
+    como: "usuario"
+    quiero: "una aplicación web separada del backend"
+    para: "usar el servicio desde el navegador"
+    criterios:
+      - dado: "frontend/"
+        cuando: "ejecuto `make frontend` (pnpm dev)"
+        entonces: "abre en http://localhost:5173 con el título del proyecto"
+      - dado: "el CI"
+        cuando: "corre"
+        entonces: "ejecuta pnpm lint, pnpm test (vitest) y pnpm build"
+    notas: "Vite + React 18 + TS + Vitest + Testing Library. VITE_API_URL=http://localhost:8000. Sin Streamlit/Gradio/Dash."
+
+  - id: SPEC-019
+    slug: cliente-api
+    titulo: "Cliente HTTP tipado con timeout y errores"
+    capa: frontend
+    labels: [frontend]
+    milestone: M3
+    puntos: 3
+    dia: 3
+    depende: [SPEC-018]
+    pruebas: 0
+    como: "desarrollador del frontend"
+    quiero: "un cliente que llame /predict, /health y /model con tipos del contrato"
+    para: "no repetir fetch ni manejar errores en cada componente"
+    criterios:
+      - dado: "una respuesta 200"
+        cuando: "llamo predict(file)"
+        entonces: "obtengo un PredictionResponse tipado"
+      - dado: "una respuesta 4xx/5xx con ErrorResponse"
+        cuando: "llamo predict"
+        entonces: "se lanza ApiError con code, message y status"
+      - dado: "más de N segundos sin respuesta"
+        cuando: "llamo predict"
+        entonces: "se aborta con AbortController y se lanza TimeoutError"
+    notas: "src/api/client.ts y src/api/types.ts (alineados con OpenAPI); pruebas vitest con fetch simulado."
+
+  - id: SPEC-020
+    slug: carga-imagen
+    titulo: "Componente de carga de imagen con vista previa y validación"
+    capa: frontend
+    labels: [frontend]
+    milestone: M3
+    puntos: 3
+    dia: 3
+    depende: [SPEC-018]
+    pruebas: 0
+    como: "médico"
+    quiero: "arrastrar o elegir una radiografía y verla antes de enviarla"
+    para: "confirmar que subo la imagen correcta"
+    criterios:
+      - dado: "un PNG/JPEG/DICOM menor al límite"
+        cuando: "lo suelto o selecciono"
+        entonces: "veo la vista previa (o el nombre si es DICOM) y se habilita «Analizar»"
+      - dado: "un tipo no soportado o un archivo muy grande"
+        cuando: "lo selecciono"
+        entonces: "veo un mensaje de validación y no se envía nada"
+    notas: "components/UploadZone.tsx."
+
+  - id: SPEC-021
+    slug: estados-ui
+    titulo: "Estados idle / loading / success / error con reintento"
+    capa: frontend
+    labels: [frontend]
+    milestone: M3
+    puntos: 3
+    dia: 3
+    depende: [SPEC-019, SPEC-020]
+    pruebas: 0
+    como: "usuario"
+    quiero: "saber en todo momento qué está pasando con mi análisis"
+    para: "no quedarme esperando sin información"
+    criterios:
+      - dado: "el envío de una imagen"
+        cuando: "espera la respuesta"
+        entonces: "se muestra loading y el botón se deshabilita"
+      - dado: "un error de red o 5xx"
+        cuando: "falla"
+        entonces: "se muestra el mensaje y el botón «Reintentar»"
+      - dado: "una respuesta exitosa"
+        cuando: "llega"
+        entonces: "se pasa a success y se muestra el resultado"
+    notas: "useReducer con estados discriminados; pruebas de la máquina de estados."
+
+  - id: SPEC-022
+    slug: tarjeta-resultado
+    titulo: "Tarjeta de resultado con confianza, umbral y latencia"
+    capa: frontend
+    labels: [frontend]
+    milestone: M3
+    puntos: 2
+    dia: 3
+    depende: [SPEC-021]
+    pruebas: 0
+    como: "médico"
+    quiero: "ver la etiqueta, la probabilidad de neumonía y el umbral aplicado"
+    para: "interpretar el resultado con contexto"
+    criterios:
+      - dado: "un PredictionResponse"
+        cuando: "se muestra"
+        entonces: "veo etiqueta, barra de probabilidad, umbral, latencia y modelo@rev"
+      - dado: "una probabilidad cercana al umbral (±0.05)"
+        cuando: "se muestra"
+        entonces: "aparece la advertencia «resultado incierto»"
+    notas: "components/ResultCard.tsx."
+
+  - id: SPEC-023
+    slug: salud-backend
+    titulo: "Indicador de salud del backend"
+    capa: frontend
+    labels: [frontend]
+    milestone: M3
+    puntos: 2
+    dia: 4
+    depende: [SPEC-019]
+    pruebas: 0
+    como: "usuario"
+    quiero: "ver si el servicio está disponible antes de subir una imagen"
+    para: "no perder tiempo si el backend está caído"
+    criterios:
+      - dado: "/health responde ok"
+        cuando: "carga la app"
+        entonces: "el indicador muestra «Servicio listo» y el modelo"
+      - dado: "/health falla o devuelve 503"
+        cuando: "carga la app o pasa el intervalo de sondeo"
+        entonces: "se muestra un banner y «Analizar» queda deshabilitado"
+    notas: "sondeo cada 15 s; components/HealthBadge.tsx."
+
+  - id: SPEC-024
+    slug: historial-sesion
+    titulo: "Historial de análisis de la sesión"
+    capa: frontend
+    labels: [frontend]
+    milestone: M3
+    puntos: 2
+    dia: 4
+    depende: [SPEC-022]
+    pruebas: 0
+    como: "médico"
+    quiero: "ver los últimos análisis de esta sesión"
+    para: "comparar imágenes sin volver a subirlas"
+    criterios:
+      - dado: "varios análisis exitosos"
+        cuando: "miro el historial"
+        entonces: "veo hasta 10, del más reciente al más antiguo, con etiqueta y probabilidad"
+      - dado: "que recargo la página"
+        cuando: "vuelve a cargar"
+        entonces: "el historial se vacía (no se guardan datos clínicos en el navegador)"
+    notas: "estado en memoria; sin localStorage por privacidad."
+
+  # ───────────────────────── DÍA 5 · Frontend final + MLflow ─────────────────────────
+  - id: SPEC-025
+    slug: accesibilidad-responsive
+    titulo: "Accesibilidad y diseño responsive"
+    capa: frontend
+    labels: [frontend]
+    milestone: M3
+    puntos: 2
+    dia: 4
+    depende: [SPEC-022]
+    pruebas: 0
+    como: "usuario con teclado o lector de pantalla"
+    quiero: "poder usar toda la app sin ratón y en pantallas pequeñas"
+    para: "que la herramienta sea accesible"
+    criterios:
+      - dado: "navegación con Tab"
+        cuando: "recorro la app"
+        entonces: "todos los controles son alcanzables y tienen foco visible"
+      - dado: "un cambio de estado"
+        cuando: "ocurre"
+        entonces: "se anuncia con aria-live"
+      - dado: "un ancho de 375 px"
+        cuando: "abro la app"
+        entonces: "no hay desplazamiento horizontal"
+    notas: "pruebas con Testing Library por rol; contraste AA."
+
+  - id: SPEC-026
+    slug: acerca-modelo-aviso
+    titulo: "Panel «Acerca del modelo» y aviso de uso"
+    capa: frontend
+    labels: [frontend]
+    milestone: M3
+    puntos: 2
+    dia: 4
+    depende: [SPEC-016, SPEC-019]
+    pruebas: 0
+    como: "médico"
+    quiero: "saber qué modelo se usa, con qué datos se entrenó y sus límites"
+    para: "no usarlo fuera de su alcance"
+    criterios:
+      - dado: "GET /api/v1/model"
+        cuando: "abro «Acerca del modelo»"
+        entonces: "veo modelo@rev, licencia, labels, umbral y enlace a la Model Card"
+      - dado: "cualquier resultado"
+        cuando: "se muestra"
+        entonces: "aparece el aviso «herramienta de apoyo; no reemplaza el criterio clínico»"
+    notas: "components/ModelInfo.tsx."
+
+  - id: SPEC-027
+    slug: servidor-mlflow-tracking
+    titulo: "Servidor MLflow local y módulo de tracking"
+    capa: mlflow
+    labels: [mlflow]
+    milestone: M3
+    puntos: 3
+    dia: 4
+    depende: [SPEC-004]
+    pruebas: 4
+    como: "científico de datos"
+    quiero: "un servidor MLflow en 127.0.0.1:5050 y helpers de tracking"
+    para: "registrar evaluaciones de forma reproducible"
+    criterios:
+      - dado: '`make mlflow`'
+        cuando: "lo ejecuto"
+        entonces: "levanta mlflow server en 5050 con sqlite:///mlflow.db y artefactos en ./mlruns"
+      - dado: "un run abierto con el helper"
+        cuando: "termina"
+        entonces: "tiene tags de commit SHA, rama, modelo@rev, licencia, equipo, ambiente y enlace a la historia (issue)"
+    notas: "src/neumonia/tracking/; pruebas con tracking URI file:// temporal; mlflow.db y mlruns/ en .gitignore."
+
+  - id: SPEC-028
+    slug: dataset-evaluacion
+    titulo: "Dataset de evaluación independiente con manifiesto versionado"
+    capa: mlflow
+    labels: [mlflow, qa]
+    milestone: M3
+    puntos: 3
+    dia: 4
+    depende: [SPEC-008]
+    pruebas: 5
+    como: "científico de datos"
+    quiero: "un manifiesto CSV (ruta, etiqueta) con hash y un cargador"
+    para: "evaluar siempre sobre el mismo conjunto y registrar su versión"
+    criterios:
+      - dado: "data/eval/manifest.csv"
+        cuando: "lo cargo"
+        entonces: "valido columnas, etiquetas NORMAL/PNEUMONIA y que los archivos existan"
+      - dado: "el manifiesto"
+        cuando: "calculo su versión"
+        entonces: "obtengo un hash SHA-256 estable que se registra como parámetro"
+    notas: >-
+      Usar RSNA (adultos) como conjunto independiente: el ViT se entrenó con
+      keremberke/chest-xray-classification (derivado de Kermany), así que el test de Kermany
+      puede estar contaminado. Las imágenes viven en data/raw/ (ignorado por Git);
+      scripts/preparar_eval.py arma el manifiesto desde data/raw/rsna_csv/rsna_eval_500.csv (DICOM en data/raw/rsna/, heredados del proyecto anterior; ver ARRANQUE.md 2A).
+
+  - id: SPEC-029
+    slug: script-evaluacion
+    titulo: "Script de evaluación con métricas de calidad y latencia en MLflow"
+    capa: mlflow
+    labels: [mlflow]
+    milestone: M3
+    puntos: 5
+    dia: 4
+    depende: [SPEC-027, SPEC-028, SPEC-009]
+    pruebas: 6
+    como: "científico de datos"
+    quiero: '`uv run python scripts/evaluar.py --config configs/baseline.yaml`'
+    para: "medir el modelo con el mismo servicio que usa el backend"
+    criterios:
+      - dado: "una configuración y el manifiesto"
+        cuando: "ejecuto evaluar.py"
+        entonces: "registra params (modelo@rev, umbral, preprocesamiento, dataset_hash, device)"
+      - dado: "la evaluación terminada"
+        cuando: "reviso el run"
+        entonces: "tiene accuracy, precision, recall, F1, AUC-ROC, latencia media/p95 y throughput"
+      - dado: "la evaluación terminada"
+        cuando: "reviso artefactos"
+        entonces: "hay matriz de confusión, curva ROC, predicciones de ejemplo (CSV) y reporte"
+    notas: "reutiliza DiagnosisService (no duplicar inferencia); métricas con scikit-learn."
+
+  - id: SPEC-030
+    slug: tres-runs-comparables
+    titulo: "Tres runs comparables en el mismo experimento"
+    capa: mlflow
+    labels: [mlflow]
+    milestone: M3
+    puntos: 3
+    dia: 4
+    depende: [SPEC-029]
+    pruebas: 3
+    como: "evaluador del curso"
+    quiero: "ver en la UI de MLflow tres runs comparables del mismo experimento"
+    para: "justificar la configuración que usa el backend"
+    criterios:
+      - dado: "configs/{baseline,umbral-035,clahe}.yaml"
+        cuando: "ejecuto `make evaluar-todo`"
+        entonces: "aparecen 3 runs en el experimento neumonia-vit-eval con los mismos campos"
+      - dado: "la vista Compare de MLflow"
+        cuando: "selecciono los 3 runs"
+        entonces: "se ven diferencias de recall, especificidad, F1, AUC y latencia"
+    notas: "documentar en docs/experimentos.md qué cambia en cada run y cuál se elige y por qué."
+
+  - id: SPEC-031
+    slug: model-registry
+    titulo: "Registro del modelo en MLflow Model Registry"
+    capa: mlflow
+    labels: [mlflow, backend]
+    milestone: M3
+    puntos: 3
+    dia: 4
+    depende: [SPEC-030]
+    pruebas: 4
+    como: "operador"
+    quiero: "el modelo que usa el backend registrado con versión y alias"
+    para: "garantizar que lo que se sirve es lo que se evaluó"
+    criterios:
+      - dado: "el run elegido"
+        cuando: "registro el modelo neumonia-vit"
+        entonces: "queda una versión con tags model_id y revision iguales a la config del backend"
+      - dado: "la versión registrada"
+        cuando: "le asigno alias/stage production"
+        entonces: "/api/v1/model muestra la misma revisión"
+    notas: "pyfunc liviano que referencia repo@rev (sin copiar 330 MB de pesos) o mlflow.transformers si el disco lo permite."
+
+  # ───────────────────────── DÍA 6 · Calidad, Docker y docs ─────────────────────────
+  - id: SPEC-032
+    slug: integracion-e2e-api
+    titulo: "Pruebas de integración del flujo completo de la API"
+    capa: qa
+    labels: [qa]
+    milestone: M3
+    puntos: 3
+    dia: 4
+    depende: [SPEC-013, SPEC-017]
+    pruebas: 10
+    como: "equipo"
+    quiero: "pruebas que recorran arranque → /health → /predict → errores con TestClient"
+    para: "detectar regresiones de integración entre capas"
+    criterios:
+      - dado: "la app con FakeClassifier"
+        cuando: "corro el flujo completo"
+        entonces: "cada endpoint responde con el código y el schema esperados"
+      - dado: "cada error documentado (400/413/415/422/500/503/504)"
+        cuando: "lo provoco"
+        entonces: "hay una prueba que lo verifica"
+    notas: "tests/integration/."
+
+  - id: SPEC-033
+    slug: cobertura-ci
+    titulo: "Cobertura mínima de 85 % en CI"
+    capa: qa
+    labels: [qa, infra]
+    milestone: M3
+    puntos: 2
+    dia: 5
+    depende: [SPEC-032]
+    pruebas: 6
+    como: "revisor"
+    quiero: "que el CI falle si la cobertura baja de 85 %"
+    para: "mantener probadas las capas de servicio e inferencia"
+    criterios:
+      - dado: "pytest-cov configurado"
+        cuando: "corre el CI"
+        entonces: "publica el porcentaje y falla por debajo de 85 %"
+      - dado: "el reporte"
+        cuando: "lo reviso"
+        entonces: "services/ e inference/ (sin vit.py) superan 90 %"
+    notas: "añadir las pruebas que falten para cubrir ramas de error."
+
+  - id: SPEC-034
+    slug: contrato-openapi
+    titulo: "Prueba de contrato OpenAPI"
+    capa: qa
+    labels: [qa, backend]
+    milestone: M3
+    puntos: 2
+    dia: 5
+    depende: [SPEC-016]
+    pruebas: 4
+    como: "desarrollador del frontend"
+    quiero: "que un cambio no intencional del contrato rompa una prueba"
+    para: "no romper el cliente sin darme cuenta"
+    criterios:
+      - dado: "docs/openapi.json versionado"
+        cuando: "la app genera su esquema"
+        entonces: "coincide con el archivo (o la prueba indica cómo regenerarlo)"
+      - dado: "el contrato"
+        cuando: "lo reviso"
+        entonces: "todas las rutas declaran sus respuestas de error"
+    notas: '`make openapi` regenera el archivo; types.ts del frontend se revisa contra él.'
+
+  - id: SPEC-035
+    slug: docker-cpu
+    titulo: "Imagen Docker CPU multi-stage y docker compose"
+    capa: infra
+    labels: [infra]
+    milestone: M3
+    puntos: 3
+    dia: 5
+    depende: [SPEC-012, SPEC-018]
+    pruebas: 3
+    como: "operador"
+    quiero: "levantar backend, frontend y MLflow con un comando"
+    para: "reproducir el sistema en cualquier máquina"
+    criterios:
+      - dado: '`docker build -f Dockerfile .`'
+        cuando: "termina"
+        entonces: "la imagen usa torch CPU, usuario no root y uv sync --locked"
+      - dado: '`docker compose up`'
+        cuando: "arranca"
+        entonces: "backend en 8000 (/health ok), frontend en 5173/8080 y MLflow en 5050"
+      - dado: "la imagen"
+        cuando: "reviso sus capas"
+        entonces: "no contiene pesos del modelo (se descargan o montan desde la caché de HF)"
+    notas: "pruebas que validan Dockerfile y compose (parseo y reglas básicas)."
+
+  - id: SPEC-036
+    slug: pre-commit
+    titulo: "Hooks de pre-commit (ruff, formato, archivos grandes, secretos)"
+    capa: kanban
+    labels: [kanban, infra]
+    milestone: M3
+    puntos: 1
+    dia: 5
+    depende: [SPEC-001]
+    pruebas: 0
+    como: "integrante"
+    quiero: "que los errores comunes se detecten antes de cada commit"
+    para: "no gastar ciclos de CI en errores triviales"
+    criterios:
+      - dado: '`uv run pre-commit install`'
+        cuando: "hago commit"
+        entonces: "corren ruff, ruff-format, end-of-file-fixer, check-yaml, check-added-large-files y detect-private-key"
+      - dado: "un archivo .ipynb o mayor de 1 MB"
+        cuando: "intento commitearlo"
+        entonces: "el commit se bloquea"
+    notas: "excluir *.svg de end-of-file-fixer."
+
+  - id: SPEC-037
+    slug: readme-badges
+    titulo: "README con badges, arquitectura, instalación y uso"
+    capa: docs
+    labels: [docs]
+    milestone: M3
+    puntos: 2
+    dia: 5
+    depende: [SPEC-035]
+    pruebas: 1
+    como: "evaluador"
+    quiero: "un README que explique el proyecto y cómo correrlo en minutos"
+    para: "abrir el proyecto sin preguntar nada"
+    criterios:
+      - dado: "el README"
+        cuando: "lo abro"
+        entonces: "tiene badges (CI, cobertura, Python 3.13, uv, licencia), problema, arquitectura, instalación con uv, uso, estructura y enlaces a tablero, specs, Model Card y MLflow"
+      - dado: "los comandos del README"
+        cuando: "los sigo en una máquina limpia"
+        entonces: "funcionan sin pasos ocultos"
+    notas: "prueba que verifica que los enlaces relativos del README existen."
+
+  # ───────────────────────── DÍA 7 · Model Card, arquitectura y cierre ─────────────────────────
+  - id: SPEC-038
+    slug: model-card
+    titulo: "Model Card formal en docs/model-card.md"
+    capa: docs
+    labels: [docs]
+    milestone: M3
+    puntos: 3
+    dia: 5
+    depende: [SPEC-031]
+    pruebas: 2
+    como: "médico y evaluador"
+    quiero: "una Model Card con modelo base, datos, métricas, limitaciones, sesgos y licencia"
+    para: "saber cuándo confiar en el modelo y cuándo no"
+    criterios:
+      - dado: "docs/model-card.md"
+        cuando: "la leo"
+        entonces: "tiene modelo base (org/modelo@rev, ViT-B/16, 85.8M), dataset de origen, métricas reportadas y medidas (run_id de MLflow), latencia, throughput, limitaciones, sesgos (pediátrico vs. adultos, proyección AP/PA) y licencia Apache-2.0"
+      - dado: "la revisión de la Model Card"
+        cuando: "la comparo con la config y el Registry"
+        entonces: "coinciden (una prueba lo verifica)"
+    notas: "reutilizar el análisis de sesgos de RSNA del proyecto anterior como contexto, con cifras nuevas del ViT."
+
+  - id: SPEC-039
+    slug: arquitectura-archify-adr
+    titulo: "Diagrama de arquitectura (Archify) y ADRs"
+    capa: docs
+    labels: [docs]
+    milestone: M3
+    puntos: 2
+    dia: 5
+    depende: [SPEC-035]
+    pruebas: 1
+    como: "evaluador"
+    quiero: "ver la arquitectura y las decisiones clave"
+    para: "entender el sistema sin leer todo el código"
+    criterios:
+      - dado: "docs/arquitectura.html"
+        cuando: "lo abro"
+        entonces: "muestra navegador → React → HTTP/JSON → FastAPI → servicio → modelo MaaS, más MLflow"
+      - dado: "docs/adr/"
+        cuando: "lo reviso"
+        entonces: "hay ADRs para «frontend desacoplado», «ViT de HF fijado a revisión» y «MLflow sin hiperparámetros»"
+    notas: "hacer el diagrama con Archify como en clase y enlazarlo desde el README; los ADR se enlazan desde las specs."
+
+  - id: SPEC-040
+    slug: limpieza-calidad
+    titulo: "Cero warnings, type hints y docstrings completos"
+    capa: kanban
+    labels: [kanban, qa]
+    milestone: M3
+    puntos: 2
+    dia: 5
+    depende: [SPEC-033]
+    pruebas: 4
+    como: "revisor"
+    quiero: "el código sin warnings, con tipos y docstrings"
+    para: "cerrar deuda técnica antes de la sustentación"
+    criterios:
+      - dado: '`uv run pytest -q -W error`'
+        cuando: "corre"
+        entonces: "no hay warnings"
+      - dado: '`uv run ruff check .` con reglas D y ANN'
+        cuando: "corre"
+        entonces: "no hay errores; funciones públicas con docstring y type hints"
+    notas: "añadir las pruebas que falten para llegar a ≥ 120 si hace falta."
+
+  # ───────────────────────── M4 · PROVISIONAL (ajustar tras la Clase 10, 19/11) ─────────────────────────
+  - id: SPEC-041
+    slug: gitlab-ci-compuertas
+    titulo: "Pipeline GitLab CI/CD con compuertas de calidad"
+    capa: infra
+    labels: [infra, m4]
+    milestone: M4
+    puntos: 5
+    dia: 6
+    depende: [SPEC-033, SPEC-035]
+    pruebas: 0
+    como: "equipo"
+    quiero: "un pipeline lint → test → build → deploy que se detenga si falla una compuerta"
+    para: "publicar solo versiones que cumplen la calidad"
+    criterios:
+      - dado: "un push a main en el espejo de GitLab"
+        cuando: "corre el pipeline"
+        entonces: "deploy solo ocurre si ruff, pytest y cobertura ≥ 85 % pasan"
+    notas: "provisional; confirmar requisitos en la Clase 10."
+
+  - id: SPEC-042
+    slug: credenciales-protegidas
+    titulo: "Credenciales como variables protegidas y enmascaradas"
+    capa: infra
+    labels: [infra, m4]
+    milestone: M4
+    puntos: 2
+    dia: 6
+    depende: [SPEC-041]
+    pruebas: 0
+    como: "operador"
+    quiero: "que tokens y llaves SSH vivan solo en variables protegidas"
+    para: "no exponer secretos en el repositorio ni en logs"
+    criterios:
+      - dado: "el pipeline"
+        cuando: "usa credenciales"
+        entonces: "provienen de variables protegidas/enmascaradas y no aparecen en logs"
+    notas: "provisional."
+
+  - id: SPEC-043
+    slug: despliegue-droplet
+    titulo: "Despliegue en Droplet con docker compose"
+    capa: infra
+    labels: [infra, m4]
+    milestone: M4
+    puntos: 5
+    dia: 6
+    depende: [SPEC-042]
+    pruebas: 0
+    como: "usuario"
+    quiero: "acceder al servicio desplegado por URL"
+    para: "usarlo fuera del computador de desarrollo"
+    criterios:
+      - dado: "el job deploy"
+        cuando: "termina"
+        entonces: "el Droplet corre la versión del commit y /health responde ok"
+    notas: "provisional."
+
+  - id: SPEC-044
+    slug: verificacion-post-despliegue
+    titulo: "Verificación post-despliegue y rollback"
+    capa: qa
+    labels: [qa, m4]
+    milestone: M4
+    puntos: 3
+    dia: 6
+    depende: [SPEC-043]
+    pruebas: 0
+    como: "operador"
+    quiero: "un smoke test tras desplegar y volver a la versión anterior si falla"
+    para: "no dejar el servicio caído"
+    criterios:
+      - dado: "un despliegue"
+        cuando: "/health o una predicción de humo fallan"
+        entonces: "el pipeline restaura la imagen anterior y queda en rojo"
+    notas: "provisional."
+
+  - id: SPEC-045
+    slug: postmortem
+    titulo: "Post-mortem de un incidente de despliegue"
+    capa: docs
+    labels: [docs, m4]
+    milestone: M4
+    puntos: 2
+    dia: 6
+    depende: [SPEC-044]
+    pruebas: 0
+    como: "equipo"
+    quiero: "documentar un incidente con línea de tiempo, causa raíz y acciones"
+    para: "aprender sin culpables y demostrarlo en la sustentación M4"
+    criterios:
+      - dado: "docs/postmortem.md"
+        cuando: "lo leo"
+        entonces: "tiene resumen, impacto, línea de tiempo, causa raíz, qué funcionó y acciones con responsable"
+    notas: "provisional."

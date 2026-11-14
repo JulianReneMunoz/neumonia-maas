@@ -1,0 +1,45 @@
+# Python / uv
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Secretos y entorno
+.env
+.env.*
+!.env.example
+
+# Datos y modelos (los pesos NO van a Git: se descargan con scripts/descargar_modelo.py)
+data/raw/
+data/eval/*.png
+data/eval/*.jpg
+data/eval/*.dcm
+*.pt
+*.pth
+*.h5
+*.onnx
+*.joblib
+*.safetensors
+*.ckpt
+*.bin
+
+# MLflow local
+mlflow.db
+mlruns/
+mlartifacts/
+
+# Notebooks (prohibidos)
+*.ipynb
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+
+# Sistema
+.DS_Store
+Thumbs.db
+.claude/settings.local.json
