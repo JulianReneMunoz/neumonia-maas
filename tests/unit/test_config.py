@@ -1,4 +1,6 @@
 import ast
+import fnmatch
+import json
 import os
 import re
 from pathlib import Path
@@ -260,3 +262,23 @@ def test_env_example_no_contiene_secretos(raiz_repo: Path) -> None:
     # Assert
     assert claves_sensibles == []
     assert tokens_hf == []
+
+
+def test_claude_no_lee_env_con_secretos_pero_si_env_example(raiz_repo: Path) -> None:
+    # Arrange
+    ajustes = json.loads((raiz_repo / ".claude" / "settings.json").read_text(encoding="utf-8"))
+    patrones = [
+        regla.removeprefix("Read(./").removesuffix(")")
+        for regla in ajustes["permissions"]["deny"]
+        if regla.startswith("Read(./")
+    ]
+
+    # Act
+    def bloqueado(nombre: str) -> bool:
+        return any(fnmatch.fnmatchcase(nombre, patron) for patron in patrones)
+
+    # Assert
+    # Los archivos con secretos siguen protegidos...
+    assert all(bloqueado(n) for n in (".env", ".env.local", ".env.development.local"))
+    # ...pero .env.example no tiene secretos y debe poder escribirse y versionarse.
+    assert not bloqueado(".env.example")
