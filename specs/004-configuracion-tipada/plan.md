@@ -9,6 +9,7 @@
 | `tests/conftest.py` | **Modificar** (creado en SPEC-001): fixture `autouse` `_cache_settings_limpia` que llama `get_settings.cache_clear()` antes y después de cada prueba, para que ninguna prueba (de esta ni de futuras historias) herede configuración de otra. |
 | `tests/unit/test_config.py` | **Crear.** Fixture local `entorno_limpio` y las pruebas de §5. |
 | `README.md` | **Modificar** mínimamente: sección «Configuración» que remite a `.env.example` y explica la prioridad entorno > `.env` > default. |
+| `.claude/settings.json` | **Modificar** (*ajuste pedido por el usuario, RNF-6*): en `permissions.deny`, `Read(./.env.*)` → `Read(./.env.local)` y `Read(./.env.*.local)`; se mantiene `Read(./.env)`. Razón: la regla del kit bloqueaba `.env.example`, que no tiene secretos y debe versionarse. Prueba: `test_claude_no_lee_env_con_secretos_pero_si_env_example`. |
 
 ### Firmas públicas
 ```python

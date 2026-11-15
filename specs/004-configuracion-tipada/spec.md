@@ -64,6 +64,11 @@ y CORS por variables de entorno **para** cambiar el comportamiento sin tocar có
 - RNF-2: `Settings` es inmutable (`frozen=True`): nadie cambia la configuración en caliente.
 - RNF-3: Sin secretos en `.env.example`, en los defaults ni en la representación (`repr`) de
   `Settings`; `.env` sigue ignorado por Git (ya lo está en `.gitignore`).
+- RNF-6: Claude Code no puede leer los archivos de entorno con secretos (`.env`,
+  `.env.local`, `.env.*.local`), pero sí `.env.example`, que no tiene secretos y se versiona.
+  *Ajuste (15/11/2026, pedido por el usuario):* la regla deny `Read(./.env.*)` del kit en
+  `.claude/settings.json` también bloqueaba `.env.example` e impidió escribirlo (T7); se
+  sustituye por `Read(./.env)`, `Read(./.env.local)` y `Read(./.env.*.local)`.
 - RNF-4: Pruebas pytest con patrón AAA, sin red, con `monkeypatch`, aisladas del `.env` real
   del desarrollador y con la caché de `get_settings` limpia entre pruebas.
 - RNF-5: Pasa `ruff` con las reglas de SPEC-001 (ANN, docstrings estilo Google) y pytest con
