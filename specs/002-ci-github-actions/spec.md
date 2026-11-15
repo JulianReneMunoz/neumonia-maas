@@ -1,7 +1,7 @@
 # SPEC-002 · Integración continua con GitHub Actions (ruff + pytest)
 
-- **Estado:** Borrador <!-- Borrador → Aprobada → Implementada -->
-- **Historia:** #? (confirmar con `uv run scripts/tablero.py issue SPEC-002`) · **Puntos:** 2 · **Milestone:** M3 · **Labels:** infra, qa
+- **Estado:** Aprobada <!-- Borrador → Aprobada → Implementada -->
+- **Historia:** #2 · **Puntos:** 2 · **Milestone:** M3 · **Labels:** infra, qa
 - **Depende de:** SPEC-001
 - **PR:** #N (se completa al abrirla)
 
@@ -117,18 +117,11 @@ Definition of Done.
    trae `develop` con merge una vez fusionada SPEC-001 (T1 lo verifica); sin rebase,
    porque la rama ya está en el remoto y `push --force` está prohibido. Si la
    fixture cambia de nombre, se adapta el plan.
-2. **PyYAML como dependencia dev.** Para que la prueba «el YAML parsea» sea real se
-   propone `uv add --dev pyyaml` (actualiza `uv.lock`). ¿Se acepta añadirla? La
-   alternativa sin dependencias (buscar cadenas en el texto) no comprueba que el YAML sea
-   válido.
-3. **Protección de ramas en repo privado de plan gratuito.** Si GitHub rechaza
-   `branches/<rama>/protection` (ARRANQUE.md §6), la mitad «no se puede fusionar» de
-   AC-2 no se puede demostrar con la plataforma; quedaría como evidencia el check rojo +
-   la guardia de Claude Code + `/fusionar`, que se niega sin checks verdes. ¿El repo es
-   público o privado?
-4. **Fijar acciones por versión mayor o por SHA.** El plan usa etiquetas mayores
-   (`actions/checkout@v5`, `astral-sh/setup-uv@v6` o la mayor vigente al implementar).
-   Fijar por SHA es más seguro pero menos legible en la sustentación. ¿Basta con la
-   etiqueta mayor?
-5. **Número del issue** en GitHub para el encabezado y `Closes #N`: confirmarlo al abrir
-   la PR.
+Resueltas en la aprobación (14/11/2026):
+2. **PyYAML como dependencia dev:** aceptada (`uv add --dev pyyaml`).
+3. **Protección de ramas:** el repo es **privado** por ahora. Se intenta aplicar la
+   protección (T9); si GitHub no lo permite, AC-2 se demuestra con una **PR en borrador**
+   con un test roto cuyo check `ci` queda en rojo, y se cierra sin fusionar (T10). Esa PR
+   no cuenta como una de las 40.
+4. **Acciones:** se fijan por etiqueta de versión mayor (la vigente al implementar, T4).
+5. **Número del issue:** #2 (igual al número de la spec).
