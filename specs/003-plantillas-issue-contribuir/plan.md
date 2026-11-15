@@ -47,7 +47,9 @@ contact_links:
    `Backlog → spec (spec.md, plan.md, tasks.md) → rama feature/NNN-slug → PR → review → merge a develop → Done`
    y tabla paso → comando (`/siguiente`, `/spec`, `/implementar`, `/pr`, `/revisar`,
    `/fusionar`) → columna de la tarjeta. Incluye que la spec se commitea y aprueba antes del
-   código y que la tarjeta pasa a In Progress al empezar a implementar.
+   código y que la tarjeta pasa a In Progress **al empezar `/spec`** (paso 3 de
+   `.claude/commands/spec.md`), o al empezar a implementar si la spec se escribió con `/lote`.
+   *Ajuste tras la revisión de la PR #49 (B1).*
 2. `## Columnas y WIP limits` — tabla Columna | WIP | Entra cuando… (Backlog sin límite;
    In Progress = nº de integrantes, hoy 1; In Review = 2; Done sin límite) + regla «columna
    llena ⇒ no se empieza otra» + `uv run scripts/tablero.py mover …` respeta el WIP.
@@ -93,6 +95,7 @@ AAA, sin red ni GPU, que requiere `uv add --dev pyyaml`:
 | `tests/unit/test_plantillas_github.py::test_historia_puntos_solo_fibonacci` | AC-3 |
 | `tests/unit/test_plantillas_github.py::test_bug_y_config_sin_issues_en_blanco` | AC-4, AC-5, AC-6 |
 | `tests/unit/test_plantillas_github.py::test_contributing_tiene_flujo_wip_y_dod_coherentes` | AC-2, AC-7, AC-8 |
+| `tests/unit/test_plantillas_github.py::test_contributing_columna_de_spec_coincide_con_el_comando` (añadida en la revisión, B1) | AC-2 |
 
 La última no necesita PyYAML: lee `CONTRIBUTING.md` como texto (busca los encabezados de
 RF-6 y la cadena del flujo), `docs/tablero.json` con `json` y compara con `WIP_REVIEW`
@@ -107,7 +110,7 @@ Verificación manual (siempre):
 | Tras el merge: «New issue» muestra solo Historia, Bug y la guía; intentar enviar vacío | AC-1, AC-3, AC-4, AC-5 |
 | Lectura de `CONTRIBUTING.md` contra la lista de RF-6 | AC-2, AC-7, AC-8 |
 
-Total planeado: 4 pruebas (piso del backlog: 0).
+Total planeado: 5 pruebas (4 iniciales + 1 de la revisión de la PR #49; piso del backlog: 0).
 
 ## 6. Cómo explicarlo en la sustentación
 - Al pulsar «New issue» GitHub muestra un formulario que no deja crear la historia sin
