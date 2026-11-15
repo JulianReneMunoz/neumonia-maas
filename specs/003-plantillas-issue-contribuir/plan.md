@@ -11,7 +11,7 @@
 | `README.md` | **Modificar** una línea en «Enlaces»: `- Cómo contribuir: [CONTRIBUTING.md](CONTRIBUTING.md)`. |
 | `.github/PULL_REQUEST_TEMPLATE.md` | **Sin cambios** (RNF-3). |
 | `pyproject.toml` / `uv.lock` | `uv add --dev pyyaml` (aprobado; si SPEC-002 ya la añadió, no se toca). |
-| `tests/unit/test_plantillas_github.py` | **Opcional** (ver §5). Usa el fixture `raiz_repo` de `tests/conftest.py` (SPEC-001). |
+| `tests/unit/test_plantillas_github.py` | **Crear** (4 pruebas, aprobadas; ver §5). Usa el fixture `raiz_repo` de `tests/conftest.py` (SPEC-001). |
 
 No hay código de producción ni firmas públicas nuevas en `src/`.
 
