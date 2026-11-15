@@ -174,7 +174,7 @@ def cmd_metricas(cfg: dict[str, Any]) -> None:
             "--json",
             "number,closedAt",
         )
-        or []  # fmt: skip
+        or []
     }
     fus = [
         datetime.fromisoformat(p["mergedAt"].replace("Z", "+00:00"))
@@ -190,7 +190,7 @@ def cmd_metricas(cfg: dict[str, Any]) -> None:
             "--json",
             "mergedAt",
         )
-        or []  # fmt: skip
+        or []
     ]
     m = metricas(items, cerrados, fus, datetime.now(UTC).date(), cfg["integrantes"])
     print("Columnas :", m["columnas"])
