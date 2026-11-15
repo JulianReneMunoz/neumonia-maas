@@ -12,7 +12,7 @@
 
 ### Bloque B · .env.example
 - [x] **T6** Escribir en `tests/unit/test_config.py` `test_env_example_documenta_todos_los_campos`, `test_env_example_carga_exactamente_los_defaults` y `test_env_example_no_contiene_secretos` (AAA, usan `raiz_repo`) — *Hecho cuando:* fallan porque `.env.example` no existe · *Depende de:* T5 · *Cubre:* AC-3
-- [ ] **T7** Crear `.env.example` en la raíz: cabecera, una línea comentada por variable con su default idéntico al de `config.py`, sin secretos; confirmar con `git check-ignore .env.example` que no está ignorado — *Hecho cuando:* las 3 pruebas de T6 pasan y `git status` muestra `.env.example` como archivo nuevo · *Depende de:* T6 · *Cubre:* RF-9, RNF-3, AC-3
+- [x] **T7** Crear `.env.example` en la raíz: cabecera, una línea comentada por variable con su default idéntico al de `config.py`, sin secretos; confirmar con `git check-ignore .env.example` que no está ignorado — *Hecho cuando:* las 3 pruebas de T6 pasan y `git status` muestra `.env.example` como archivo nuevo · *Depende de:* T6 · *Cubre:* RF-9, RNF-3, AC-3 · *Nota:* el archivo lo creó el usuario (UTF-8 sin BOM) porque la regla deny `Read(./.env.*)` de `.claude/settings.json` bloqueaba escribirlo; ver T7b.
 
 ### Bloque C · Calidad, demo y entrega
 - [ ] **T8** `make check` (ruff con ANN y D Google + pytest con `filterwarnings = error`) — *Hecho cuando:* ruff y formato en 0 hallazgos y toda la suite (SPEC-001 + 19 casos de esta spec) en verde, sin advertencias · *Depende de:* T7 · *Cubre:* RNF-4, RNF-5
