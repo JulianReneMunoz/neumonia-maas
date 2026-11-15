@@ -4,7 +4,7 @@
 
 ### Bloque 0 · Preparación
 - [x] **T1** Traer `develop` (con SPEC-001 ya fusionada) a `feature/002-ci-github-actions` con merge, sin rebase ni `push --force` — *Hecho cuando:* existen `pyproject.toml`, `uv.lock`, `.python-version`, `Makefile` y la fixture `raiz_repo` en `tests/conftest.py`, y `make check` está en verde antes de tocar nada · *Cubre:* precondición de todos los AC
-- [ ] **T2** Añadir PyYAML al grupo dev con `uv add --dev pyyaml` — *Hecho cuando:* `pyproject.toml` y `uv.lock` cambian solo en esa dependencia y `uv sync --locked` termina sin error · *Depende de:* T1 · *Cubre:* RF-7
+- [x] **T2** Añadir PyYAML al grupo dev con `uv add --dev pyyaml` — *Hecho cuando:* `pyproject.toml` y `uv.lock` cambian solo en esa dependencia y `uv sync --locked` termina sin error · *Depende de:* T1 · *Cubre:* RF-7
 
 ### Bloque 1 · Workflow (TDD)
 - [ ] **T3** Escribir `tests/unit/test_ci.py` con las 7 pruebas del plan §5 (fixture `workflow_ci`, helpers `_comandos_run` y `_disparadores` con el caso `on` → `True` comentado) — *Hecho cuando:* `uv run pytest tests/unit/test_ci.py` falla porque `.github/workflows/ci.yml` no existe (no por errores de import o sintaxis) · *Depende de:* T2 · *Cubre:* AC-1, AC-2, AC-3, AC-4, AC-5, AC-6
