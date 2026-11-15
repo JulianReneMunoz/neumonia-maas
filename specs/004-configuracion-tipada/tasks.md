@@ -11,7 +11,7 @@
 - [x] **T5** Añadir el validador del umbral (mensaje `NEUMONIA_THRESHOLD debe estar en el rango 0–1 (recibido: …)`), el validador `before` de `cors_origins` (coma, recorte, vacíos fuera) y las propiedades `model_ref` y `max_upload_bytes` — *Hecho cuando:* las 13 funciones de T3 pasan sin advertencias · *Depende de:* T4 · *Cubre:* RF-3, RF-5, RF-6, AC-2, AC-5, AC-7
 
 ### Bloque B · .env.example
-- [ ] **T6** Escribir en `tests/unit/test_config.py` `test_env_example_documenta_todos_los_campos`, `test_env_example_carga_exactamente_los_defaults` y `test_env_example_no_contiene_secretos` (AAA, usan `raiz_repo`) — *Hecho cuando:* fallan porque `.env.example` no existe · *Depende de:* T5 · *Cubre:* AC-3
+- [x] **T6** Escribir en `tests/unit/test_config.py` `test_env_example_documenta_todos_los_campos`, `test_env_example_carga_exactamente_los_defaults` y `test_env_example_no_contiene_secretos` (AAA, usan `raiz_repo`) — *Hecho cuando:* fallan porque `.env.example` no existe · *Depende de:* T5 · *Cubre:* AC-3
 - [ ] **T7** Crear `.env.example` en la raíz: cabecera, una línea comentada por variable con su default idéntico al de `config.py`, sin secretos; confirmar con `git check-ignore .env.example` que no está ignorado — *Hecho cuando:* las 3 pruebas de T6 pasan y `git status` muestra `.env.example` como archivo nuevo · *Depende de:* T6 · *Cubre:* RF-9, RNF-3, AC-3
 
 ### Bloque C · Calidad, demo y entrega

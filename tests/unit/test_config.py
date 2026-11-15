@@ -1,10 +1,12 @@
 import ast
 import os
+import re
 from pathlib import Path
 
 import pytest
-from neumonia.config import DEFAULT_MODEL_ID, DEFAULT_MODEL_REVISION, Settings, get_settings
 from pydantic import ValidationError
+
+from neumonia.config import DEFAULT_MODEL_ID, DEFAULT_MODEL_REVISION, Settings, get_settings
 
 PROHIBIDOS_EN_CONFIG = {"fastapi", "starlette", "torch", "transformers"}
 
@@ -204,3 +206,57 @@ def test_config_no_importa_fastapi_ni_torch(raiz_repo: Path) -> None:
 
     # Assert
     assert raices.isdisjoint(PROHIBIDOS_EN_CONFIG), raices & PROHIBIDOS_EN_CONFIG
+
+
+def _variables_de_env_example(raiz: Path) -> dict[str, str]:
+    """Pares ``NEUMONIA_X=valor`` de ``.env.example`` (se ignoran comentarios y vacíos)."""
+    texto = (raiz / ".env.example").read_text(encoding="utf-8")
+    pares = (linea.split("=", 1) for linea in texto.splitlines() if "=" in linea)
+    return {clave.strip(): valor.strip() for clave, valor in pares if not clave.startswith("#")}
+
+
+def test_env_example_documenta_todos_los_campos(raiz_repo: Path) -> None:
+    # Arrange
+    esperadas = {f"NEUMONIA_{campo.upper()}" for campo in Settings.model_fields}
+
+    # Act
+    documentadas = set(_variables_de_env_example(raiz_repo))
+
+    # Assert
+    assert esperadas - documentadas == set(), "campos sin documentar en .env.example"
+    assert documentadas - esperadas == set(), "variables en .env.example que Settings no tiene"
+
+
+def test_env_example_carga_exactamente_los_defaults(
+    entorno_limpio: pytest.MonkeyPatch, raiz_repo: Path
+) -> None:
+    # Arrange
+    archivo = raiz_repo / ".env.example"
+    # pydantic-settings ignora en silencio un env_file inexistente: sin esto la prueba
+    # pasaría aunque .env.example no existiera.
+    assert archivo.is_file(), ".env.example no existe"
+
+    # Act
+    desde_ejemplo = Settings(_env_file=archivo)
+    por_defecto = Settings(_env_file=None)
+
+    # Assert
+    assert desde_ejemplo == por_defecto
+
+
+def test_env_example_no_contiene_secretos(raiz_repo: Path) -> None:
+    # Arrange
+    texto = (raiz_repo / ".env.example").read_text(encoding="utf-8")
+    claves = _variables_de_env_example(raiz_repo)
+
+    # Act
+    claves_sensibles = [
+        clave
+        for clave in claves
+        if any(palabra in clave for palabra in ("TOKEN", "SECRET", "PASSWORD", "API_KEY"))
+    ]
+    tokens_hf = re.findall(r"\bhf_[A-Za-z0-9]{10,}", texto)
+
+    # Assert
+    assert claves_sensibles == []
+    assert tokens_hf == []
