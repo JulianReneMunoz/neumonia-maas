@@ -1,7 +1,7 @@
 # SPEC-004 · Configuración tipada con pydantic-settings
 
-- **Estado:** Borrador <!-- Borrador → Aprobada → Implementada -->
-- **Historia:** #? (confirmar con `uv run scripts/tablero.py issue SPEC-004`) · **Puntos:** 2 · **Milestone:** M3 · **Labels:** backend
+- **Estado:** Aprobada <!-- Borrador → Aprobada → Implementada -->
+- **Historia:** #4 · **Puntos:** 2 · **Milestone:** M3 · **Labels:** backend
 - **Depende de:** SPEC-001
 - **PR:** #N (se completa al abrirla)
 
@@ -160,13 +160,10 @@ y CORS por variables de entorno **para** cambiar el comportamiento sin tocar có
    esta rama con merge (sin rebase: la rama ya está en el remoto y `push --force` está
    prohibido). Si al implementar cambia algún nombre de SPEC-001, se ajusta con
    `docs(spec): ajuste …`.
-2. **Revisión por defecto del modelo.** Mientras SPEC-005 no fije el SHA, el default es
-   `main` (válido para Hugging Face, pero no reproducible). SPEC-005 lo sustituirá por el SHA
-   en `config.py`, `.env.example` y `docs/backlog.yaml`. ¿Aceptas `main` como provisional, o
-   prefieres un marcador inválido (p. ej. `PENDIENTE`) que obligue a fijarlo?
-3. **Timeout por defecto.** Se propone `30.0` s para `NEUMONIA_TIMEOUT_S` (inferencia ViT en
-   CPU más la primera llamada, más lenta). El backlog no da un valor; confirmar.
-4. **Orígenes CORS por defecto.** Se proponen `http://localhost:5173` y
-   `http://127.0.0.1:5173` (Vite). Si la demo con contenedores (SPEC de arranque) sirve el
-   frontend en `8080`, ¿se añade ya o lo hace esa historia?
-5. **Número de issue** de SPEC-004: confirmar con `uv run scripts/tablero.py issue SPEC-004`.
+Resueltas en la aprobación (14/11/2026; el usuario aceptó las opciones recomendadas):
+2. **Revisión por defecto del modelo:** `main` como provisional; SPEC-005 la sustituye por
+   el SHA en `config.py`, `.env.example` y `docs/backlog.yaml`.
+3. **Timeout por defecto:** `30.0` s para `NEUMONIA_TIMEOUT_S`.
+4. **Orígenes CORS por defecto:** solo `http://localhost:5173` y `http://127.0.0.1:5173`;
+   otro puerto (p. ej. `8080` de contenedores) lo añade la historia que lo necesite (SPEC-035).
+5. **Número de issue:** #4 (igual al número de la spec).
