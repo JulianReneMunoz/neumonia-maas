@@ -4,11 +4,11 @@
 # ///
 """Operación diaria del Kanban: siguiente historia, mover tarjetas con WIP, métricas.
 
-    uv run scripts/tablero.py siguiente
-    uv run scripts/tablero.py historia SPEC-005
-    uv run scripts/tablero.py issue SPEC-005
-    uv run scripts/tablero.py mover SPEC-005 "In Progress"
-    uv run scripts/tablero.py metricas
+uv run scripts/tablero.py siguiente
+uv run scripts/tablero.py historia SPEC-005
+uv run scripts/tablero.py issue SPEC-005
+uv run scripts/tablero.py mover SPEC-005 "In Progress"
+uv run scripts/tablero.py metricas
 """
 
 from __future__ import annotations
@@ -71,7 +71,9 @@ def siguiente(
     return None, "No hay historias listas: faltan dependencias en Done o el backlog está vacío."
 
 
-def puede_mover(destino: str, items: dict[str, dict[str, Any]], spec: str, integrantes: int) -> str | None:
+def puede_mover(
+    destino: str, items: dict[str, dict[str, Any]], spec: str, integrantes: int
+) -> str | None:
     """Devuelve el motivo si mover violaría el WIP, o None si se puede."""
     tope = limite(destino, integrantes)
     if tope is None:
@@ -112,7 +114,10 @@ def metricas(
     ordenadas = sorted(semanas.items())
     return {
         "columnas": c,
-        "wip": f"{c['In Progress']}/{integrantes} (In Progress), {c['In Review']}/{WIP_REVIEW} (In Review)",
+        "wip": (
+            f"{c['In Progress']}/{integrantes} (In Progress), "
+            f"{c['In Review']}/{WIP_REVIEW} (In Review)"
+        ),
         "work_item_age": edades,
         "cycle_time_dias": {
             "n": len(ciclos),
@@ -157,13 +162,35 @@ def cmd_metricas(cfg: dict[str, Any]) -> None:
     items = leer_items(cfg)
     cerrados = {
         i["number"]: datetime.fromisoformat(i["closedAt"].replace("Z", "+00:00"))
-        for i in gh_json("issue", "list", "--repo", cfg["repo"], "--state", "closed",
-                         "--limit", "300", "--json", "number,closedAt") or []  # fmt: skip
+        for i in gh_json(
+            "issue",
+            "list",
+            "--repo",
+            cfg["repo"],
+            "--state",
+            "closed",
+            "--limit",
+            "300",
+            "--json",
+            "number,closedAt",
+        )
+        or []
     }
     fus = [
         datetime.fromisoformat(p["mergedAt"].replace("Z", "+00:00"))
-        for p in gh_json("pr", "list", "--repo", cfg["repo"], "--state", "merged", "--limit", "300",
-                         "--json", "mergedAt") or []  # fmt: skip
+        for p in gh_json(
+            "pr",
+            "list",
+            "--repo",
+            cfg["repo"],
+            "--state",
+            "merged",
+            "--limit",
+            "300",
+            "--json",
+            "mergedAt",
+        )
+        or []
     ]
     m = metricas(items, cerrados, fus, datetime.now(UTC).date(), cfg["integrantes"])
     print("Columnas :", m["columnas"])
@@ -190,7 +217,10 @@ def main() -> None:
     backlog = cargar_backlog()
     if a.cmd == "historia":
         h = historia_por_id(backlog, a.spec)
-        print(f"{h['id']} · {h['titulo']}  [{h['puntos']} pts · día {h['dia']} · {', '.join(h['labels'])}]")
+        print(
+            f"{h['id']} · {h['titulo']}  "
+            f"[{h['puntos']} pts · día {h['dia']} · {', '.join(h['labels'])}]"
+        )
         print(f"Como {h['como']}, quiero {h['quiero']} para {h['para']}")
         print(f"Depende de: {', '.join(h['depende']) or '—'} · pruebas ≥ {h['pruebas']}")
         print(f"Carpeta de la spec: specs/{h['id'][5:]}-{h['slug']}/")

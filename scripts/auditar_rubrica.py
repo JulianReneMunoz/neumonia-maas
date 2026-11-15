@@ -71,8 +71,10 @@ def main() -> int:
     for h in m3.values():
         if h["puntos"] not in (1, 2, 3, 5, 8) or not h["criterios"]:
             fallos.append(f"{h['id']}: puntos o AC inválidos")
-    print(f"Ítems cubiertos: {len(COBERTURA) - len(fallos)}/{len(COBERTURA)} · "
-          f"historias M3: {len(m3)} · piso de pruebas: {total_pruebas}")
+    print(
+        f"Ítems cubiertos: {len(COBERTURA) - len(fallos)}/{len(COBERTURA)} · "
+        f"historias M3: {len(m3)} · piso de pruebas: {total_pruebas}"
+    )
     for f in fallos:
         print("❌", f)
     return 1 if fallos else 0
