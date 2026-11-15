@@ -16,7 +16,7 @@
 - [x] **T8** Añadir en `README.md`, sección «Enlaces», la línea `- Cómo contribuir: [CONTRIBUTING.md](CONTRIBUTING.md)` — *Hecho cuando:* el enlace aparece y resuelve en la vista de GitHub · *Depende de:* T7 · *Cubre:* AC-8
 
 ### Bloque C · Cierre
-- [ ] **T9** `make check` — *Hecho cuando:* ruff + pytest en verde (incluidas las 4 pruebas de T1 y T5) · *Depende de:* T4, T8 · *Cubre:* RNF-5
+- [x] **T9** `make check` — *Hecho cuando:* ruff + pytest en verde (incluidas las 4 pruebas de T1 y T5) · *Depende de:* T4, T8 · *Cubre:* RNF-5
 - [ ] **T10** Demo local/previa: abrir en GitHub la vista de `historia.yml`, `bug.yml` y `config.yml` en la rama y leer `CONTRIBUTING.md` contra RF-6 — *Hecho cuando:* las tres vistas previas no muestran errores de esquema, los cuatro campos de la historia salen como obligatorios y la lista RF-6 está completa · *Depende de:* T9 · *Cubre:* AC-1…AC-8
 - [ ] **T11** Documentación y PR: `Estado: Implementada` en `spec.md`, PR con la plantilla y `Closes #3` — *Hecho cuando:* PR abierta hacia `develop` con título Conventional Commits que incluye SPEC-003 · *Depende de:* T10
 - [ ] **T12** Verificación post-merge: en «New issue» comprobar que solo aparecen «Historia de usuario», «Bug» y «Guía de contribución», e intentar enviar una historia vacía — *Hecho cuando:* GitHub bloquea el envío por los campos obligatorios y no hay opción de issue en blanco · *Depende de:* T11 (merge) · *Cubre:* AC-1, AC-3, AC-4, AC-5
