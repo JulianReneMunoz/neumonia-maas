@@ -20,7 +20,9 @@ CONFIG_TABLERO = RAIZ / "docs" / "tablero.json"
 COLUMNAS = ["Backlog", "In Progress", "In Review", "Done"]
 COLUMNA_DESCRIPCION = {
     "Backlog": "Sin WIP. Todo lo que aún no empieza.",
-    "In Progress": "WIP = nº de integrantes. Una historia por persona; si está lleno, no se empieza otra.",
+    "In Progress": (
+        "WIP = nº de integrantes. Una historia por persona; si está lleno, no se empieza otra."
+    ),
     "In Review": "WIP = 2. PR abierta, reviewer asignado, checks corriendo.",
     "Done": "Mergeada, tests verdes, AC cumplidos, spec implementada y demo local.",
 }
@@ -54,7 +56,8 @@ def gh(*args: str, dry_run: bool = False, check: bool = True) -> str:
     return res.stdout
 
 
-def gh_json(*args: str) -> Any:
+# `gh --json` devuelve JSON arbitrario (lista, dict o nada): Any es el tipo honesto aquí.
+def gh_json(*args: str) -> Any:  # noqa: ANN401
     """Ejecuta `gh ... ` y parsea la salida JSON."""
     salida = gh(*args)
     return json.loads(salida) if salida.strip() else None
