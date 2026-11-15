@@ -1,0 +1,45 @@
+# Integración continua (SPEC-002): la misma compuerta que `make check`, en un runner limpio.
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+
+# El job solo lee el código: mínimo privilegio para el GITHUB_TOKEN.
+permissions:
+  contents: read
+
+# Un push nuevo a la misma rama cancela la ejecución anterior.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # El id `ci` es el nombre del check que exige docs/proteccion-rama.json:
+  # sin `name:` ni `matrix`, para que el contexto siga siendo exactamente `ci`.
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      # setup-uv no publica etiqueta flotante de mayor: versión exacta.
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+          python-version: "3.13"
+
+      - name: Instalar dependencias (lock exacto)
+        run: uv sync --locked
+
+      - name: Ruff (lint)
+        run: uv run ruff check .
+
+      - name: Ruff (formato)
+        run: uv run ruff format --check .
+
+      - name: Pytest
+        run: uv run pytest
