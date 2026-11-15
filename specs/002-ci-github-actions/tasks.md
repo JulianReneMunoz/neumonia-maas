@@ -8,7 +8,7 @@
 
 ### Bloque 1 · Workflow (TDD)
 - [x] **T3** Escribir `tests/unit/test_ci.py` con las 7 pruebas del plan §5 (fixture `workflow_ci`, helpers `_comandos_run` y `_disparadores` con el caso `on` → `True` comentado) — *Hecho cuando:* `uv run pytest tests/unit/test_ci.py` falla porque `.github/workflows/ci.yml` no existe (no por errores de import o sintaxis) · *Depende de:* T2 · *Cubre:* AC-1, AC-2, AC-3, AC-4, AC-5, AC-6
-- [ ] **T4** Verificar la versión mayor vigente de `actions/checkout` y `astral-sh/setup-uv` y anotarla en el plan si difiere de `@v5`/`@v6` — *Hecho cuando:* las dos etiquetas están confirmadas (enlace a su página de releases en el cuerpo de la PR) · *Depende de:* T3
+- [x] **T4** Verificar la versión mayor vigente de `actions/checkout` y `astral-sh/setup-uv` y anotarla en el plan si difiere de `@v5`/`@v6` — *Hecho cuando:* las dos etiquetas están confirmadas (enlace a su página de releases en el cuerpo de la PR) · *Depende de:* T3 · *Resultado:* `actions/checkout@v7` (v7.0.1, https://github.com/actions/checkout/releases/tag/v7.0.1); `astral-sh/setup-uv@v10.3.3` (sin etiqueta flotante `v10`; https://github.com/astral-sh/setup-uv/releases/tag/v10.3.3)
 - [ ] **T5** Crear `.github/workflows/ci.yml` según el contrato del plan §2 — *Hecho cuando:* las 7 pruebas de T3 pasan · *Depende de:* T4 · *Cubre:* AC-1, AC-3, AC-4, AC-5, AC-6
 - [ ] **T6** Comprobar a mano que la prueba de fallos detecta un retroceso: añadir temporalmente `continue-on-error: true` a un paso y luego quitar `--locked` — *Hecho cuando:* en cada caso falla la prueba esperada y, al revertir, todo vuelve a verde (`git diff` vacío en el YAML respecto a T5) · *Depende de:* T5 · *Cubre:* AC-2, AC-3
 

@@ -124,4 +124,7 @@ Resueltas en la aprobación (14/11/2026):
    con un test roto cuyo check `ci` queda en rojo, y se cierra sin fusionar (T10). Esa PR
    no cuenta como una de las 40.
 4. **Acciones:** se fijan por etiqueta de versión mayor (la vigente al implementar, T4).
+   *Ajuste (15/11/2026, aprobado por el usuario):* `astral-sh/setup-uv` ya no publica
+   etiquetas flotantes de mayor (no existe `v10`, solo `v10.3.3`, `v10.3.2`…), así que se
+   fija a la versión exacta `@v10.3.3`; `actions/checkout` sí tiene `@v7` y se usa la mayor.
 5. **Número del issue:** #2 (igual al número de la spec).

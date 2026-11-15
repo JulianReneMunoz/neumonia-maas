@@ -52,8 +52,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v6      # mayor vigente al implementar (pregunta abierta 4)
+      - uses: actions/checkout@v7          # mayor vigente (v7.0.1, 20/07/2026)
+      - uses: astral-sh/setup-uv@v10.3.3   # sin etiqueta flotante v10: versión exacta (pregunta abierta 4)
         with:
           enable-cache: true
           cache-dependency-glob: uv.lock
