@@ -1,7 +1,7 @@
 # SPEC-003 · Plantillas de historia de usuario y guía de contribución
 
-- **Estado:** Borrador <!-- Borrador → Aprobada → Implementada -->
-- **Historia:** #? (confirmar con `uv run scripts/tablero.py issue SPEC-003`) · **Puntos:** 1 · **Milestone:** M3 · **Labels:** kanban, docs
+- **Estado:** Aprobada <!-- Borrador → Aprobada → Implementada -->
+- **Historia:** #3 · **Puntos:** 1 · **Milestone:** M3 · **Labels:** kanban, docs
 - **Depende de:** SPEC-001
 - **PR:** #N (se completa al abrirla)
 
@@ -124,15 +124,10 @@ Given-When-Then, puntos y spec.
 - `make check` en verde tras la PR.
 
 ## 7. Preguntas abiertas
-1. **Las plantillas ya existen** (vienen en el kit inicial y ya están en `develop`, la rama
-   por defecto). El plan las **ajusta** (bloque `markdown`, `contact_links`) en vez de
-   crearlas. ¿De acuerdo con tocar archivos del kit en esta PR?
-2. **Prueba automática opcional.** El piso es 0 pruebas. El plan propone 3 pruebas pytest sin
-   red que parsean los YAML y verifican los `required`; necesitan PyYAML como dependencia de
-   desarrollo (`uv add --dev pyyaml`). ¿Se incluyen (suman al conteo de ≥ 120 pruebas) o se
-   deja la historia en 0 pruebas?
-3. **Demo del AC-1/AC-4/AC-5.** GitHub solo usa las plantillas de la rama por defecto
-   (`develop`), así que el formulario «real» con los cambios se ve después del merge. Antes,
-   la demo usa la vista previa del archivo `.yml` en la rama. ¿Es aceptable?
-4. **Número del issue** de SPEC-003 en GitHub para el encabezado y `Closes #N`: confirmarlo al
-   abrir la PR.
+Resueltas en la aprobación (14/11/2026):
+1. **Las plantillas ya existen:** aceptado; se **ajustan** en esta PR en vez de recrearlas.
+2. **Pruebas automáticas:** se incluyen las 4 pruebas (T1 y T5 dejan de ser opcionales) con
+   PyYAML como dependencia dev (`uv add --dev pyyaml`; si SPEC-002 ya la añadió, no se repite).
+3. **Demo:** aceptado; antes del merge se usa la vista previa del `.yml` en la rama y el
+   formulario real se verifica después del merge (T12).
+4. **Número del issue:** #3 (igual al número de la spec).
