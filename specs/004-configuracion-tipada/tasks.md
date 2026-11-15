@@ -1,0 +1,20 @@
+# Tareas · SPEC-004
+
+<!-- Atómicas, en orden. La primera de cada bloque escribe las pruebas (TDD). -->
+<!-- Requisito previo: SPEC-001 fusionada en develop y traída a esta rama con merge (sin rebase). Ver pregunta abierta 1. -->
+
+### Bloque A · Settings y get_settings
+- [ ] **T1** Verificar el punto de partida: `pyproject.toml`, `src/neumonia/__init__.py`, `tests/conftest.py` (fixture `raiz_repo`) y `make check` existen y están en verde — *Hecho cuando:* `uv run pytest -q` pasa en la rama antes de cualquier cambio · *Cubre:* requisito previo (SPEC-001)
+- [ ] **T2** `uv add "pydantic-settings>=2.7"` — *Hecho cuando:* `pyproject.toml` lista `pydantic-settings` en `dependencies`, `uv.lock` actualizado y `uv sync --locked` termina sin errores · *Depende de:* T1 · *Cubre:* RF-10
+- [ ] **T3** Escribir en `tests/unit/test_config.py` la fixture `entorno_limpio` y las pruebas de defaults, propiedades, sobrescritura, umbral (fuera de rango, no numérico, extremos), límites no positivos, CORS, caché, `.env` con prioridad, inmutabilidad e imports (13 funciones del plan §5, AAA); añadir a `tests/conftest.py` la fixture `autouse` `_cache_settings_limpia` — *Hecho cuando:* `uv run pytest tests/unit/test_config.py` falla por `ModuleNotFoundError: neumonia.config` (la razón correcta) · *Depende de:* T2 · *Cubre:* AC-1, AC-2, AC-4, AC-5, AC-6, AC-7, AC-8, AC-9, AC-10
+- [ ] **T4** Crear `src/neumonia/config.py` con `DEFAULT_MODEL_ID`, `DEFAULT_MODEL_REVISION`, `Settings` (campos, `SettingsConfigDict` con prefijo, `.env`, `extra="ignore"`, `frozen=True`, `protected_namespaces=()`), `Field(gt=0)` para tamaño y timeout, y `get_settings()` con `lru_cache(maxsize=1)`; docstrings Google — *Hecho cuando:* pasan defaults, sobrescritura, límites, caché, `.env`, inmutabilidad e imports · *Depende de:* T3 · *Cubre:* RF-1, RF-2, RF-4, RF-7, RF-8, AC-1, AC-4, AC-6, AC-8, AC-9, AC-10
+- [ ] **T5** Añadir el validador del umbral (mensaje `NEUMONIA_THRESHOLD debe estar en el rango 0–1 (recibido: …)`), el validador `before` de `cors_origins` (coma, recorte, vacíos fuera) y las propiedades `model_ref` y `max_upload_bytes` — *Hecho cuando:* las 13 funciones de T3 pasan sin advertencias · *Depende de:* T4 · *Cubre:* RF-3, RF-5, RF-6, AC-2, AC-5, AC-7
+
+### Bloque B · .env.example
+- [ ] **T6** Escribir en `tests/unit/test_config.py` `test_env_example_documenta_todos_los_campos`, `test_env_example_carga_exactamente_los_defaults` y `test_env_example_no_contiene_secretos` (AAA, usan `raiz_repo`) — *Hecho cuando:* fallan porque `.env.example` no existe · *Depende de:* T5 · *Cubre:* AC-3
+- [ ] **T7** Crear `.env.example` en la raíz: cabecera, una línea comentada por variable con su default idéntico al de `config.py`, sin secretos; confirmar con `git check-ignore .env.example` que no está ignorado — *Hecho cuando:* las 3 pruebas de T6 pasan y `git status` muestra `.env.example` como archivo nuevo · *Depende de:* T6 · *Cubre:* RF-9, RNF-3, AC-3
+
+### Bloque C · Calidad, demo y entrega
+- [ ] **T8** `make check` (ruff con ANN y D Google + pytest con `filterwarnings = error`) — *Hecho cuando:* ruff y formato en 0 hallazgos y toda la suite (SPEC-001 + 19 casos de esta spec) en verde, sin advertencias · *Depende de:* T7 · *Cubre:* RNF-4, RNF-5
+- [ ] **T9** Demo local en Git Bash y PowerShell: (a) `uv run python -c "from neumonia.config import get_settings; s = get_settings(); print(s.model_ref, s.threshold, s.max_upload_mb)"` muestra los defaults; (b) con `NEUMONIA_THRESHOLD=0.35` (PowerShell: `$env:NEUMONIA_THRESHOLD="0.35"`) muestra `0.35`; (c) con `1.5` muestra el error en español con la variable y el rango; limpiar la variable al terminar — *Hecho cuando:* los tres resultados se ven en ambos shells y la demo se puede repetir · *Depende de:* T8 · *Cubre:* AC-1, AC-2, AC-4
+- [ ] **T10** Documentación y PR: sección «Configuración» en `README.md` (remite a `.env.example`, prioridad entorno > `.env` > default, ejemplo en PowerShell y Git Bash); spec en `Estado: Implementada`; PR hacia `develop` con `Closes #N` — *Hecho cuando:* README actualizado y PR abierta · *Depende de:* T9
