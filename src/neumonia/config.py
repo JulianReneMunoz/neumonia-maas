@@ -11,7 +11,7 @@ valor por defecto.
 from functools import lru_cache
 from typing import Annotated, Final
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 DEFAULT_MODEL_ID: Final = "lxyuan/vit-xray-pneumonia-classification"
@@ -54,6 +54,49 @@ class Settings(BaseSettings):
         "http://127.0.0.1:5173",
     ]
     mlflow_tracking_uri: str = "http://127.0.0.1:5050"
+
+    @field_validator("threshold")
+    @classmethod
+    def _validar_umbral(cls, valor: float) -> float:
+        """Rechaza umbrales fuera de [0, 1] con un mensaje que nombra la variable.
+
+        Args:
+            valor: Umbral ya convertido a ``float`` por pydantic.
+
+        Returns:
+            El mismo valor si está en el rango.
+
+        Raises:
+            ValueError: Si el umbral es menor que 0 o mayor que 1.
+        """
+        if not 0.0 <= valor <= 1.0:
+            raise ValueError(f"NEUMONIA_THRESHOLD debe estar en el rango 0–1 (recibido: {valor})")
+        return valor
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def _separar_origenes(cls, valor: object) -> object:
+        """Convierte ``"http://a:1, http://b:2,"`` en ``["http://a:1", "http://b:2"]``.
+
+        Args:
+            valor: Texto separado por comas (desde el entorno) o una lista ya armada.
+
+        Returns:
+            La lista de orígenes sin espacios ni elementos vacíos; otros tipos pasan tal cual.
+        """
+        if isinstance(valor, str):
+            return [origen.strip() for origen in valor.split(",") if origen.strip()]
+        return valor
+
+    @property
+    def model_ref(self) -> str:
+        """Referencia ``org/modelo@revision`` que muestran /health, /model y MLflow."""
+        return f"{self.model_id}@{self.model_revision}"
+
+    @property
+    def max_upload_bytes(self) -> int:
+        """Tamaño máximo de la imagen subida, en bytes."""
+        return self.max_upload_mb * 1024 * 1024
 
 
 @lru_cache(maxsize=1)
