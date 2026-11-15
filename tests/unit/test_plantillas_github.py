@@ -144,3 +144,19 @@ def test_contributing_tiene_flujo_wip_y_dod_coherentes(raiz_repo: Path) -> None:
     assert faltan_dod == []
     assert faltan_enlaces == []
     assert "](CONTRIBUTING.md)" in readme
+
+
+def test_contributing_columna_de_spec_coincide_con_el_comando(raiz_repo: Path) -> None:
+    # Arrange
+    guia = (raiz_repo / "CONTRIBUTING.md").read_text(encoding="utf-8")
+    comando_spec = (raiz_repo / ".claude" / "commands" / "spec.md").read_text(encoding="utf-8")
+    movida = re.search(r'tablero\.py mover \$ARGUMENTS "([^"]+)"', comando_spec)
+
+    # Act
+    fila_spec = next(linea for linea in guia.splitlines() if linea.startswith("| 2. Especificar"))
+    columna_guia = fila_spec.rstrip(" |").rsplit("|", 1)[-1]
+
+    # Assert
+    # La guía debe describir lo que hace `/spec` de verdad (ahí empieza a contar el cycle time).
+    assert movida, "el comando /spec ya no mueve la tarjeta: revisar la guía"
+    assert columna_guia.strip().startswith(movida.group(1))
