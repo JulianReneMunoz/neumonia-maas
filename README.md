@@ -40,6 +40,26 @@ El resultado se publica como el check **`ci`**, el que exige la protección de r
 
 Versión instalada: `uv run python -c "import neumonia; print(neumonia.__version__)"`.
 
+## Configuración
+Todos los parámetros que cambian según el entorno se leen en un solo lugar,
+`src/neumonia/config.py`, con variables `NEUMONIA_*`: modelo y revisión, umbral, tamaño máximo,
+timeout, CORS y MLflow. [`.env.example`](.env.example) documenta cada variable con su valor por
+defecto. Para cambiar algo, cópialo a `.env`, que Git ignora, y edítalo.
+
+Prioridad: **variable de entorno > `.env` del directorio de trabajo > valor por defecto**. Un
+valor inválido detiene el arranque con un mensaje claro, por ejemplo
+`NEUMONIA_THRESHOLD debe estar en el rango 0–1 (recibido: 1.5)`.
+
+```bash
+# Git Bash
+NEUMONIA_THRESHOLD=0.35 uv run python -c "from neumonia.config import get_settings; print(get_settings().threshold)"
+```
+```powershell
+# PowerShell
+$env:NEUMONIA_THRESHOLD="0.35"; uv run python -c "from neumonia.config import get_settings; print(get_settings().threshold)"
+Remove-Item Env:NEUMONIA_THRESHOLD
+```
+
 ## Enlaces
 - Tablero Kanban: _(URL del Project, se agrega tras `bootstrap_github.py`)_
 - Backlog y specs SDD: [`docs/backlog.yaml`](docs/backlog.yaml) · [`specs/`](specs/)
