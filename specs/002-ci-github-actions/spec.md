@@ -3,7 +3,7 @@
 - **Estado:** Implementada <!-- Borrador → Aprobada → Implementada -->
 - **Historia:** #2 · **Puntos:** 2 · **Milestone:** M3 · **Labels:** infra, qa
 - **Depende de:** SPEC-001
-- **PR:** #N (se completa al abrirla)
+- **PR:** #47
 
 ## 1. Problema y contexto
 SPEC-001 deja una compuerta de calidad local (`make check` = ruff + pytest), pero depende

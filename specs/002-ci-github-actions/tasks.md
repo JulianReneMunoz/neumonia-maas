@@ -14,7 +14,7 @@
 
 ### Bloque 2 · Calidad, documentación y PR
 - [x] **T7** `make check` y demo local — *Hecho cuando:* ruff + pytest en verde (pruebas de SPEC-001 + 7 nuevas) y `uv run python -c "import yaml, pathlib; print(list(yaml.safe_load(pathlib.Path('.github/workflows/ci.yml').read_text())['jobs']))"` imprime `['ci']` · *Depende de:* T6
-- [ ] **T8** Documentación y PR — *Hecho cuando:* README tiene el párrafo «Integración continua», la spec pasa a `Estado: Implementada`, la PR está abierta con `Closes #2` y `gh pr checks <n>` muestra `ci` en verde (si falla solo en Linux, se corrige aquí antes de seguir) · *Depende de:* T7 · *Cubre:* AC-1
+- [x] **T8** Documentación y PR — *Hecho cuando:* README tiene el párrafo «Integración continua», la spec pasa a `Estado: Implementada`, la PR está abierta con `Closes #2` y `gh pr checks <n>` muestra `ci` en verde (si falla solo en Linux, se corrige aquí antes de seguir) · *Depende de:* T7 · *Cubre:* AC-1 · *Resultado:* PR #47; `ci` en verde en Linux (CPython 3.13.18, 16 passed, run 43676067829).
 
 ### Bloque 3 · Verificación posterior a la fusión (AC-2, AC-5)
 - [ ] **T9** Tras fusionar la PR: confirmar el push a `develop` y aplicar la protección — *Hecho cuando:* `gh run list --branch develop --workflow CI` muestra una ejecución en verde del commit de merge y los dos `gh api -X PUT …/branches/{develop,main}/protection --input docs/proteccion-rama.json` de ARRANQUE.md §6 responden sin error (si GitHub lo rechaza por el plan del repo, se guarda el mensaje como evidencia y se avisa al usuario) · *Depende de:* T8 · *Cubre:* AC-5, AC-2
