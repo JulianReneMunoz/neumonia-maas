@@ -10,6 +10,27 @@ preentrenado de Hugging Face Hub (`lxyuan/vit-xray-pneumonia-classification`, Ap
 🚧 README inicial. La historia **SPEC-037** lo completa (badges, arquitectura, instalación,
 uso y estructura).
 
+## Instalación y calidad
+Requisitos: [uv](https://docs.astral.sh/uv/) (instala Python 3.13 solo si no lo tienes).
+Este proyecto **solo usa uv**: nada de `pip` ni `requirements.txt`.
+
+```bash
+uv sync        # instala las dependencias exactas de uv.lock en .venv
+make check     # compuerta de calidad: ruff (estilo, imports, anotaciones, docstrings) + pytest
+```
+
+Sin `make` (por ejemplo en PowerShell), los equivalentes directos son:
+
+| `make` | Equivalente con uv |
+|---|---|
+| `make install` | `uv sync` |
+| `make lint` | `uv run ruff check .` y `uv run ruff format --check .` |
+| `make format` | `uv run ruff format .` y `uv run ruff check --fix .` |
+| `make test` | `uv run pytest` |
+| `make check` | `make lint` + `make test` |
+
+Versión instalada: `uv run python -c "import neumonia; print(neumonia.__version__)"`.
+
 ## Enlaces
 - Tablero Kanban: _(URL del Project, se agrega tras `bootstrap_github.py`)_
 - Backlog y specs SDD: [`docs/backlog.yaml`](docs/backlog.yaml) · [`specs/`](specs/)
