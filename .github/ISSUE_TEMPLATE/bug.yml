@@ -19,4 +19,5 @@ body:
     id: spec
     attributes:
       label: Spec afectada
+      description: Opcional. Historia cuyo comportamiento no se cumple.
       placeholder: SPEC-NNN
