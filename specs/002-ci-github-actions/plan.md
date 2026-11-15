@@ -15,12 +15,15 @@
 # tests/unit/test_ci.py
 RUTA_WORKFLOW: Final = Path(".github") / "workflows" / "ci.yml"
 
+
 @pytest.fixture
 def workflow_ci(raiz_repo: Path) -> dict[Any, Any]:
     """Workflow de CI parseado con yaml.safe_load."""
 
+
 def _comandos_run(workflow: dict[Any, Any]) -> list[str]:
     """Lista ordenada de los `run:` del job `ci`."""
+
 
 def _disparadores(workflow: dict[Any, Any]) -> dict[str, Any]:
     """Sección `on:` (PyYAML 1.1 la lee como clave `True`)."""
