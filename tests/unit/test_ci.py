@@ -110,6 +110,21 @@ def test_ningun_paso_ignora_fallos(workflow_ci: dict[Any, Any]) -> None:
     assert ignoran == [], f"pasos con continue-on-error: {ignoran}"
 
 
+def test_job_y_pasos_sin_condiciones_if(workflow_ci: dict[Any, Any]) -> None:
+    # Arrange
+    job = workflow_ci["jobs"]["ci"]
+
+    # Act
+    condicionados = [
+        paso.get("name", paso.get("uses", paso.get("run"))) for paso in job["steps"] if "if" in paso
+    ]
+
+    # Assert
+    # Un job saltado queda «skipped» y la protección de ramas lo da por cumplido.
+    assert "if" not in job, "un `if:` en el job puede saltarse el check `ci`"
+    assert condicionados == [], f"pasos condicionados con if: {condicionados}"
+
+
 def test_sin_pip_ni_setup_python(workflow_ci: dict[Any, Any]) -> None:
     # Arrange
     pasos = _pasos(workflow_ci)
@@ -131,8 +146,24 @@ def test_permisos_minimos_y_sin_matrix(workflow_ci: dict[Any, Any]) -> None:
 
     # Act
     permisos = workflow_ci.get("permissions")
+    permisos_job = job.get("permissions")
 
     # Assert
     assert permisos == {"contents": "read"}
+    assert permisos_job in (None, {"contents": "read"}), "el job no puede ampliar permisos"
     assert "strategy" not in job, "una matriz cambiaría el nombre del check (ci (3.13))"
     assert "name" not in job, "un name cambiaría el nombre del check"
+
+
+def test_concurrency_solo_cancela_en_pull_request(workflow_ci: dict[Any, Any]) -> None:
+    # Arrange
+    concurrencia = workflow_ci["concurrency"]
+
+    # Act
+    grupo = concurrencia["group"]
+    cancela = concurrencia["cancel-in-progress"]
+
+    # Assert
+    # En develop/main cada merge debe conservar su ejecución completa (AC-5).
+    assert "github.ref" in grupo
+    assert cancela == "${{ github.event_name == 'pull_request' }}"
