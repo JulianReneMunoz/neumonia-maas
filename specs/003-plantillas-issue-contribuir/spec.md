@@ -3,7 +3,7 @@
 - **Estado:** Implementada <!-- Borrador → Aprobada → Implementada -->
 - **Historia:** #3 · **Puntos:** 1 · **Milestone:** M3 · **Labels:** kanban, docs
 - **Depende de:** SPEC-001
-- **PR:** #N (se completa al abrirla)
+- **PR:** #49
 
 ## 1. Problema y contexto
 El kit inicial ya trae `.github/ISSUE_TEMPLATE/` (`historia.yml`, `bug.yml`, `config.yml`) y
