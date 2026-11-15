@@ -1,6 +1,6 @@
 # SPEC-002 · Integración continua con GitHub Actions (ruff + pytest)
 
-- **Estado:** Aprobada <!-- Borrador → Aprobada → Implementada -->
+- **Estado:** Implementada <!-- Borrador → Aprobada → Implementada -->
 - **Historia:** #2 · **Puntos:** 2 · **Milestone:** M3 · **Labels:** infra, qa
 - **Depende de:** SPEC-001
 - **PR:** #N (se completa al abrirla)
