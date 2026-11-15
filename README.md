@@ -29,6 +29,15 @@ Sin `make` (por ejemplo en PowerShell), los equivalentes directos son:
 | `make test` | `uv run pytest` |
 | `make check` | `make lint` + `make test` |
 
+### Integración continua
+Cada PR hacia `develop` o `main`, y cada push a esas ramas, ejecuta el workflow
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) en un runner Linux limpio. Ese workflow:
+1. instala uv y Python 3.13;
+2. instala exactamente lo que dice `uv.lock` con `uv sync --locked`, que falla si el lock está desactualizado;
+3. corre `ruff check`, `ruff format --check` y `pytest`, los mismos comandos que `make check`.
+
+El resultado se publica como el check **`ci`**, el que exige la protección de ramas para fusionar. Para verlo: `gh pr checks <número>` o la pestaña *Actions*.
+
 Versión instalada: `uv run python -c "import neumonia; print(neumonia.__version__)"`.
 
 ## Enlaces
