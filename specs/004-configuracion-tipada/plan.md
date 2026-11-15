@@ -16,6 +16,7 @@
 DEFAULT_MODEL_ID: Final = "lxyuan/vit-xray-pneumonia-classification"
 DEFAULT_MODEL_REVISION: Final = "main"  # provisional: SPEC-005 fija el SHA
 
+
 class Settings(BaseSettings):
     """Configuración del servicio leída de variables NEUMONIA_* y de .env."""
 
@@ -25,7 +26,7 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore",
         frozen=True,
-        protected_namespaces=(),   # evita el aviso por campos model_* con filterwarnings=error
+        protected_namespaces=(),  # evita el aviso por campos model_* con filterwarnings=error
     )
 
     model_id: str = DEFAULT_MODEL_ID
@@ -34,7 +35,8 @@ class Settings(BaseSettings):
     max_upload_mb: int = Field(default=10, gt=0)
     timeout_s: float = Field(default=30.0, gt=0)
     cors_origins: Annotated[list[str], NoDecode] = [
-        "http://localhost:5173", "http://127.0.0.1:5173",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
     ]
     mlflow_tracking_uri: str = "http://127.0.0.1:5050"
 
@@ -47,10 +49,10 @@ class Settings(BaseSettings):
     def _separar_origenes(cls, valor: object) -> object: ...
 
     @property
-    def model_ref(self) -> str: ...          # "org/modelo@rev"
+    def model_ref(self) -> str: ...  # "org/modelo@rev"
 
     @property
-    def max_upload_bytes(self) -> int: ...   # max_upload_mb * 1024 * 1024
+    def max_upload_bytes(self) -> int: ...  # max_upload_mb * 1024 * 1024
 
 
 @lru_cache(maxsize=1)
@@ -62,6 +64,7 @@ def get_settings() -> Settings:
 # tests/conftest.py (añadido)
 @pytest.fixture(autouse=True)
 def _cache_settings_limpia() -> Iterator[None]: ...
+
 
 # tests/unit/test_config.py
 @pytest.fixture
