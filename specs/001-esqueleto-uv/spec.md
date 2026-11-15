@@ -1,6 +1,6 @@
 # SPEC-001 · Esqueleto del proyecto con uv y Python 3.13
 
-- **Estado:** Aprobada <!-- Borrador → Aprobada → Implementada -->
+- **Estado:** Implementada <!-- Borrador → Aprobada → Implementada -->
 - **Historia:** #1 · **Puntos:** 2 · **Milestone:** M3 · **Labels:** infra
 - **Depende de:** ninguna
 - **PR:** #N (se completa al abrirla)
