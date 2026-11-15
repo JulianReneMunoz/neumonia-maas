@@ -1,6 +1,6 @@
 # SPEC-003 · Plantillas de historia de usuario y guía de contribución
 
-- **Estado:** Aprobada <!-- Borrador → Aprobada → Implementada -->
+- **Estado:** Implementada <!-- Borrador → Aprobada → Implementada -->
 - **Historia:** #3 · **Puntos:** 1 · **Milestone:** M3 · **Labels:** kanban, docs
 - **Depende de:** SPEC-001
 - **PR:** #N (se completa al abrirla)
