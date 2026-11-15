@@ -1,7 +1,7 @@
 # SPEC-001 · Esqueleto del proyecto con uv y Python 3.13
 
-- **Estado:** Borrador <!-- Borrador → Aprobada → Implementada -->
-- **Historia:** #? (confirmar con `uv run scripts/tablero.py issue SPEC-001`) · **Puntos:** 2 · **Milestone:** M3 · **Labels:** infra
+- **Estado:** Aprobada <!-- Borrador → Aprobada → Implementada -->
+- **Historia:** #1 · **Puntos:** 2 · **Milestone:** M3 · **Labels:** infra
 - **Depende de:** ninguna
 - **PR:** #N (se completa al abrirla)
 
@@ -105,16 +105,9 @@ pytest listos **para** que cualquiera lo instale con `uv sync` en una máquina l
 - 0 archivos `requirements*.txt` y 0 `.ipynb` en el repo.
 
 ## 7. Preguntas abiertas
-1. **`make` en Windows.** En esta máquina Git Bash trae GNU Make 4.4.1, pero PowerShell
-   puro y otras máquinas Windows pueden no tenerlo. ¿Basta con documentar los comandos
-   `uv run` equivalentes (y cómo instalar make, p. ej. `winget install ezwinports.make`),
-   o se quiere además un script Python equivalente (`scripts/check.py`)? El AC-3 no cambia.
-2. **Scripts del kit y ruff.** Con las reglas pedidas y `line-length = 100`, los scripts
-   existentes dan hoy 18 errores (11 E501, 5 D208, 1 D301, 1 ANN401) y 4 archivos sin
-   formatear (`guardia.py` ya pasa). El plan decide corregirlos en esta PR (cambios
-   mecánicos, sin cambiar comportamiento; AC-8). Confirmar que se acepta tocar archivos
-   del kit en una PR de infraestructura.
-3. **Docstrings en pruebas.** El plan desactiva `D100`–`D104` en `tests/**` para no exigir
-   docstring en cada `test_*` (los nombres ya describen el caso). ¿De acuerdo?
-4. **Número del issue** en GitHub para el encabezado: no figura en `docs/tablero.json`;
-   confirmarlo al abrir la PR (`Closes #N`).
+Resueltas en la aprobación (14/11/2026):
+1. **`make` en Windows.** El usuario tiene `make` en Windows. Se documentan además los
+   equivalentes `uv run` en el README (T11); no se crea `scripts/check.py`.
+2. **Scripts del kit y ruff.** Aceptado: se corrigen en esta PR (cambios mecánicos, AC-8).
+3. **Docstrings en pruebas.** Aceptado: `D100`–`D104` desactivados solo en `tests/**`.
+4. **Número del issue:** #1 (el número del issue es igual al de la spec).
