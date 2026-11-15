@@ -56,7 +56,9 @@ def crear_milestones(repo: str, hitos: dict[str, str], dry: bool) -> None:
     """Crea los milestones si no existen."""
     existentes = set()
     if not dry:
-        existentes = {m["title"] for m in gh_json("api", f"repos/{repo}/milestones?state=all") or []}
+        existentes = {
+            m["title"] for m in gh_json("api", f"repos/{repo}/milestones?state=all") or []
+        }
     for titulo, descripcion in hitos.items():
         if titulo in existentes:
             continue
@@ -69,7 +71,17 @@ def crear_milestones(repo: str, hitos: dict[str, str], dry: bool) -> None:
 def crear_project(owner: str, repo: str, titulo: str, dry: bool) -> dict:
     """Crea el Project, lo enlaza al repo y deja columnas y campos listos."""
     if dry:
-        gh("project", "create", "--owner", owner, "--title", titulo, "--format", "json", dry_run=True)
+        gh(
+            "project",
+            "create",
+            "--owner",
+            owner,
+            "--title",
+            titulo,
+            "--format",
+            "json",
+            dry_run=True,
+        )
         gh("project", "link", "<N>", "--owner", owner, "--repo", repo, dry_run=True)
         return {"number": 0, "id": "DRY", "fields": {}}
     proyecto = gh_json("project", "create", "--owner", owner, "--title", titulo, "--format", "json")
@@ -81,12 +93,17 @@ def crear_project(owner: str, repo: str, titulo: str, dry: bool) -> dict:
     campos = gh_json("project", "field-list", numero, "--owner", owner, "--format", "json")
     status = next(c for c in campos["fields"] if c["name"] == "Status")
     opciones = ", ".join(
-        "{name: \"" + c + "\", color: " + COLUMNA_COLOR[c]
-        + ", description: \"" + COLUMNA_DESCRIPCION[c].replace('"', "'") + "\"}"
+        '{name: "'
+        + c
+        + '", color: '
+        + COLUMNA_COLOR[c]
+        + ', description: "'
+        + COLUMNA_DESCRIPCION[c].replace('"', "'")
+        + '"}'
         for c in COLUMNAS
     )
     mutacion = (
-        "mutation { updateProjectV2Field(input: {fieldId: \"" + status["id"] + "\", "
+        'mutation { updateProjectV2Field(input: {fieldId: "' + status["id"] + '", '
         "singleSelectOptions: [" + opciones + "]}) "
         "{ projectV2Field { ... on ProjectV2SingleSelectField { id } } } }"
     )
@@ -98,7 +115,9 @@ def crear_project(owner: str, repo: str, titulo: str, dry: bool) -> dict:
     }
     faltan = [c for c in COLUMNAS if c not in mapa["Status"]["options"]]
     if faltan:
-        raise SystemExit(f"No se pudieron crear las columnas {faltan}; créalas a mano en el Project.")
+        raise SystemExit(
+            f"No se pudieron crear las columnas {faltan}; créalas a mano en el Project."
+        )
     return {"number": int(numero), "id": pid, "fields": mapa}
 
 
@@ -116,7 +135,9 @@ def crear_issues(repo: str, owner: str, proyecto: dict, historias: list, dry: bo
             url = existentes[titulo]
             print(f"= ya existe: {titulo}")
         else:
-            with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8") as f:
+            with tempfile.NamedTemporaryFile(
+                "w", suffix=".md", delete=False, encoding="utf-8"
+            ) as f:
                 f.write(cuerpo_issue(h))
                 cuerpo = f.name
             args = ["issue", "create", "--repo", repo, "--title", titulo, "--body-file", cuerpo,
