@@ -45,6 +45,7 @@ Versión instalada: `uv run python -c "import neumonia; print(neumonia.__version
 - Backlog y specs SDD: [`docs/backlog.yaml`](docs/backlog.yaml) · [`specs/`](specs/)
 - Plan: [`docs/plan-semana.md`](docs/plan-semana.md) · Guion: [`docs/guion-sustentacion.md`](docs/guion-sustentacion.md) · Ficha: [`docs/ficha-entrega.md`](docs/ficha-entrega.md)
 - Cómo trabaja el equipo con Claude Code: [`CLAUDE.md`](CLAUDE.md)
+- Cómo contribuir: [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Licencia
 MIT — ver [LICENSE](LICENSE). El modelo base conserva su licencia Apache-2.0.
