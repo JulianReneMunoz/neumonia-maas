@@ -45,7 +45,7 @@ permissions:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   ci:                       # id = nombre del check exigido por docs/proteccion-rama.json
@@ -91,6 +91,8 @@ jobs:
 | `uv sync --locked` | `uv sync`; `uv sync --frozen` | `--locked` falla si el lock no corresponde al `pyproject.toml` (AC-3); `uv sync` lo regeneraría en silencio y `--frozen` no verificaría la coherencia. |
 | Disparadores `pull_request` **y** `push` a `develop`/`main` | Solo `pull_request` | El push valida el resultado real de la fusión (AC-5), deja historial verde en la rama y será la fuente del badge de SPEC-037. Sin `push` a ramas `feature/*`: la PR ya corre y se evita duplicar ejecuciones. |
 | `permissions: contents: read` y `concurrency` con cancelación | Permisos por defecto; sin concurrencia | Mínimo privilegio (el job solo lee el código) y no se acumulan ejecuciones viejas cuando se empujan varios commits seguidos. |
+| Cancelar solo en `pull_request` (`cancel-in-progress: ${{ github.event_name == 'pull_request' }}`) — *ajuste tras la revisión de la PR #47* | `cancel-in-progress: true` para todo | Con `true`, dos merges seguidos a `develop` comparten grupo (`ci-refs/heads/develop`) y el segundo cancela el run del primero, que queda sin evidencia verde (AC-5). En una PR sí conviene cancelar: el run viejo ya no describe el código actual. |
+| Prohibir `if:` en el job y en los pasos, y `permissions` propios del job — *ajuste tras la revisión de la PR #47* | Confiar en la revisión humana | Un `if: false` deja el check `ci` en *skipped*, que la protección de ramas da por cumplido; un `permissions: write-all` en el job anula el mínimo privilegio del workflow. Las pruebas lo detectan. |
 | Pruebas con PyYAML (`yaml.safe_load`), añadida con `uv add --dev pyyaml` | Buscar cadenas en el texto; `ruamel.yaml` | El AC del backlog pide «el YAML parsea»: solo un parser real lo comprueba. PyYAML es la opción más conocida y basta para leer; `ruamel` añade complejidad sin beneficio aquí. |
 | Las pruebas no ejecutan el workflow (ni `act` ni red) | `act` local en Docker | Regla «sin red» y sin Docker en las pruebas; el comportamiento real se verifica en la propia PR (check verde) y en la PR de prueba (check rojo). |
 
@@ -124,7 +126,9 @@ jobs:
 | `tests/unit/test_ci.py::test_pasos_en_orden_sync_locked_ruff_format_pytest` | AC-1, AC-3, AC-4, RF-4, RF-5 |
 | `tests/unit/test_ci.py::test_ningun_paso_ignora_fallos` | AC-2, RF-6 |
 | `tests/unit/test_ci.py::test_sin_pip_ni_setup_python` | RNF-1 |
-| `tests/unit/test_ci.py::test_permisos_minimos_y_sin_matrix` | AC-6, RNF-2, RNF-3 |
+| `tests/unit/test_ci.py::test_permisos_minimos_y_sin_matrix` (también permisos del job) | AC-6, RNF-2, RNF-3 |
+| `tests/unit/test_ci.py::test_job_y_pasos_sin_condiciones_if` (añadida en la revisión) | AC-2, RF-6 |
+| `tests/unit/test_ci.py::test_concurrency_solo_cancela_en_pull_request` (añadida en la revisión) | AC-5, RNF-6 |
 
 Todas con patrón AAA (Arrange / Act / Assert comentados), sin red y sin subprocesos.
 
@@ -137,7 +141,7 @@ Todas con patrón AAA (Arrange / Act / Assert comentados), sin red y sin subproc
 | Con `docs/proteccion-rama.json` aplicado a `develop` y `main`, esa PR queda bloqueada | AC-2 | `gh pr view <m> --json mergeStateStatus` = `BLOCKED` + captura del botón; se cierra la PR sin fusionar y se borra la rama |
 | (opcional) misma PR de prueba con `pyproject.toml` alterado sin lock, o un `.py` sin formato | AC-3, AC-4 | paso «Instalar dependencias» o «Ruff (formato)» en rojo |
 
-Total planeado: 7 pruebas (piso del backlog: 2).
+Total planeado: 9 pruebas (7 iniciales + 2 de la revisión de la PR #47; piso del backlog: 2).
 
 ## 6. Cómo explicarlo en la sustentación
 - El archivo `.github/workflows/ci.yml` le dice a GitHub: «en cada PR hacia `develop` o

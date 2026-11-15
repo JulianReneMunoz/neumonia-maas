@@ -48,8 +48,10 @@ Definition of Done.
   un cuelgue no bloquee la PR indefinidamente.
 - RNF-5: Las pruebas del workflow no usan red ni ejecutan GitHub Actions; solo leen el
   archivo, siguen el patrón AAA y se integran en `make check`.
-- RNF-6: Ejecuciones obsoletas de la misma rama se cancelan (`concurrency`) para no
-  gastar minutos ni confundir el estado del check.
+- RNF-6: En una PR, las ejecuciones obsoletas se cancelan (`concurrency`) para no
+  gastar minutos ni confundir el estado del check. En `develop` y `main` **no** se
+  cancelan: cada merge conserva su ejecución completa (AC-5). *Ajuste tras la revisión
+  de la PR #47, aprobado por el usuario.*
 
 ## 4. Criterios de aceptación (Given-When-Then)
 **AC-1** (backlog)
@@ -108,7 +110,7 @@ Definition of Done.
 - PR de prueba con test roto: check `ci` en rojo y `mergeStateStatus = BLOCKED` tras
   aplicar la protección.
 - Duración del job ≤ 5 min con caché caliente (se lee en la pestaña Actions).
-- ≥ 2 pruebas nuevas en verde en `make check` (plan: 7).
+- ≥ 2 pruebas nuevas en verde en `make check` (plan: 9).
 
 ## 7. Preguntas abiertas
 1. **SPEC-001 aún no está en `develop`.** El `pyproject.toml`, `uv.lock`,
