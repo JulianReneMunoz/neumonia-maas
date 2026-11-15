@@ -11,10 +11,11 @@ on:
 permissions:
   contents: read
 
-# Un push nuevo a la misma rama cancela la ejecución anterior.
+# En una PR, un push nuevo cancela la ejecución anterior (ya no sirve). En develop/main
+# no se cancela: cada merge conserva su ejecución completa como evidencia (AC-5).
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   # El id `ci` es el nombre del check que exige docs/proteccion-rama.json:
