@@ -18,8 +18,8 @@ código (desarrollo guiado por especificación, SDD).
 | Paso | Comando (Claude Code) | Qué pasa | Tarjeta |
 |---|---|---|---|
 | 1. Elegir | `/siguiente` | Propone la historia con dependencias cumplidas y WIP libre. | Backlog |
-| 2. Especificar | `/spec SPEC-NNN` (o `/lote` para varias) | Crea la rama `feature/NNN-slug` desde `develop` y escribe `spec.md`, `plan.md` y `tasks.md` (commit `docs(spec)`). Se detiene hasta que el usuario la aprueba. | Backlog |
-| 3. Implementar | `/implementar SPEC-NNN` | Trae `develop` con merge, mueve la tarjeta y hace TDD tarea por tarea hasta `make check` en verde. | In Progress |
+| 2. Especificar | `/spec SPEC-NNN` (o `/lote` para varias) | Crea la rama `feature/NNN-slug` desde `develop` y escribe `spec.md`, `plan.md` y `tasks.md` (commit `docs(spec)`). Se detiene hasta que el usuario la aprueba. `/spec` mueve la tarjeta al empezar; `/lote` la deja en Backlog hasta que empieza la implementación. | In Progress (con `/lote`: Backlog) |
+| 3. Implementar | `/implementar SPEC-NNN` | Trae `develop` con merge, mueve la tarjeta si aún no está en In Progress y hace TDD tarea por tarea hasta `make check` en verde. | In Progress |
 | 4. Abrir la PR | `/pr SPEC-NNN` | Push y PR hacia `develop` con la plantilla y `Closes #N`; el CI corre el check `ci`. | In Review |
 | 5. Revisar | `/revisar <PR>` | El subagente `code-reviewer` revisa contra los AC y comenta en la PR (APROBAR o CAMBIOS). | In Review |
 | 6. Fusionar | `/fusionar <PR>` | Solo con el check `ci` en verde y la revisión hecha: merge a `develop` y la rama se borra. | Done |
@@ -32,7 +32,7 @@ El número del issue es igual al de la spec (SPEC-001 = #1). Mover tarjetas a ma
 | Columna | WIP | Entra cuando… |
 |---|---|---|
 | Backlog | sin límite | La historia tiene Como/quiero/para, AC Given-When-Then y puntos Fibonacci. Aún no empieza. |
-| In Progress | **1** (= nº de integrantes, una historia por persona) | Su spec está aprobada y empieza la implementación en su rama `feature/NNN-slug`. |
+| In Progress | **1** (= nº de integrantes, una historia por persona) | Empieza su spec con `/spec` (crea la rama `feature/NNN-slug`), o empieza su implementación si la spec se escribió con `/lote`. Al entrar se fija la fecha «Inicio»: aquí empieza a contar el cycle time. |
 | In Review | **2** | La PR está abierta hacia `develop`, con la plantilla, `Closes #N` y el check `ci` corriendo. |
 | Done | sin límite | La PR está fusionada con checks verdes, los AC se cumplen, la spec está `Implementada` y hay demo local. |
 
