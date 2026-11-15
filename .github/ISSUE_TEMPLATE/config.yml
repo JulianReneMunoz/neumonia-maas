@@ -1,1 +1,5 @@
 blank_issues_enabled: false
+contact_links:
+  - name: Guía de contribución
+    url: https://github.com/JulianReneMunoz/neumonia-maas/blob/develop/CONTRIBUTING.md
+    about: Flujo SDD, WIP limits, Definition of Done y convenciones del repo.
