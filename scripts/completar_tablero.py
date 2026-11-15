@@ -2,7 +2,7 @@
 # requires-python = ">=3.13"
 # dependencies = ["pyyaml"]
 # ///
-"""Completa el Kanban creado por bootstrap_github.py.
+r"""Completa el Kanban creado por bootstrap_github.py.
 
 - Campos nuevos: «Spec» (ruta de la spec SDD) y «Bloque» (día del plan) en cada tarjeta.
 - Asigna todas las historias al usuario autenticado (grupo de una persona).
@@ -10,7 +10,7 @@
   (columnas, WIP limits, Definition of Done, flujo y métricas).
 - Hace el Project público.
 
-Uso (desde C:\\Neumonia, después de bootstrap_github.py):
+Uso (desde C:\Neumonia, después de bootstrap_github.py):
     uv run scripts/completar_tablero.py --dry-run
     uv run scripts/completar_tablero.py
 Es idempotente: se puede repetir.
@@ -51,7 +51,8 @@ Repositorio: https://github.com/{repo}
 Si una columna está llena, no se empieza otra historia: se termina o se revisa lo que está abierto.
 
 ## Regla 1:1
-Cada tarjeta = 1 issue (`SPEC-NNN`) = 1 spec en `specs/NNN-slug/` (spec.md, plan.md, tasks.md) = 1 PR.
+Cada tarjeta = 1 issue (`SPEC-NNN`) = 1 spec en `specs/NNN-slug/`
+(spec.md, plan.md, tasks.md) = 1 PR.
 La spec se escribe y aprueba **antes** del código.
 
 ## Flujo
@@ -59,7 +60,8 @@ Backlog → spec SDD (spec + plan + tasks) → rama `feature/*` → In Progress 
 In Review → revisión + CI (ruff + pytest) → merge a `develop` → Done.
 
 ## Definition of Done
-Spec SDD · código · pruebas · documentación · PR revisada y fusionada con checks verdes · demo local.
+Spec SDD · código · pruebas · documentación · PR revisada y fusionada con checks verdes ·
+demo local.
 
 ## Campos
 **Puntos** (Fibonacci 1, 2, 3, 5, 8; una estimación por historia) · **Inicio** (fecha de entrada a
@@ -76,12 +78,16 @@ Se calculan con `uv run scripts/tablero.py metricas`.
 
 def asegurar_campos(numero: str, owner: str, dry: bool) -> dict[str, dict]:
     """Crea los campos Spec y Bloque si no existen y devuelve el mapa de campos."""
-    actuales = {} if dry else {
-        c["name"]: c
-        for c in gh_json("project", "field-list", numero, "--owner", owner, "--format", "json")[
-            "fields"
-        ]
-    }
+    actuales = (
+        {}
+        if dry
+        else {
+            c["name"]: c
+            for c in gh_json("project", "field-list", numero, "--owner", owner, "--format", "json")[
+                "fields"
+            ]
+        }
+    )
     if "Spec" not in actuales:
         gh("project", "field-create", numero, "--owner", owner, "--name", "Spec",
            "--data-type", "TEXT", dry_run=dry)  # fmt: skip
@@ -105,7 +111,12 @@ def main() -> None:
     a = p.parse_args()
     cfg = cargar_config()
     backlog = {h["id"]: h for h in cargar_backlog()["historias"]}
-    numero, owner, pid, repo = str(cfg["project_number"]), cfg["owner"], cfg["project_id"], cfg["repo"]
+    numero, owner, pid, repo = (
+        str(cfg["project_number"]),
+        cfg["owner"],
+        cfg["project_id"],
+        cfg["repo"],
+    )
 
     with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8") as f:
         f.write(README.format(repo=repo, wip=cfg["integrantes"]))

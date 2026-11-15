@@ -3,6 +3,12 @@ description: Una historia con criterios Given-When-Then, puntos Fibonacci y su s
 title: "SPEC-NNN · "
 labels: []
 body:
+  - type: markdown
+    attributes:
+      value: |
+        **Regla 1:1:** esta historia = 1 issue = 1 tarjeta = 1 spec en `specs/NNN-slug/` = 1 PR.
+        La spec (spec.md, plan.md, tasks.md) se escribe y aprueba **antes** del código.
+        Flujo, WIP limits y Definition of Done: [guía de contribución](https://github.com/JulianReneMunoz/neumonia-maas/blob/develop/CONTRIBUTING.md).
   - type: textarea
     id: historia
     attributes:
@@ -26,6 +32,7 @@ body:
     id: puntos
     attributes:
       label: Estimación (Fibonacci)
+      description: Una sola estimación por historia, en puntos de historia.
       options: ["1", "2", "3", "5", "8"]
     validations:
       required: true
