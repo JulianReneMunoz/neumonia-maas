@@ -3,7 +3,7 @@
 - **Estado:** Implementada <!-- Borrador → Aprobada → Implementada -->
 - **Historia:** #1 · **Puntos:** 2 · **Milestone:** M3 · **Labels:** infra
 - **Depende de:** ninguna
-- **PR:** #N (se completa al abrirla)
+- **PR:** #46
 
 ## 1. Problema y contexto
 Hoy el repositorio solo tiene el kit inicial (backlog, plantillas, scripts del tablero): no
