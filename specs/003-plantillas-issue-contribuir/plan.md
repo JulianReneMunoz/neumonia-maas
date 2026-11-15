@@ -10,7 +10,7 @@
 | `CONTRIBUTING.md` | **Crear** en la raíz con las 7 secciones de RF-6 (ver §2). |
 | `README.md` | **Modificar** una línea en «Enlaces»: `- Cómo contribuir: [CONTRIBUTING.md](CONTRIBUTING.md)`. |
 | `.github/PULL_REQUEST_TEMPLATE.md` | **Sin cambios** (RNF-3). |
-| `pyproject.toml` / `uv.lock` | **Solo si se aprueba la prueba opcional:** `uv add --dev pyyaml`. |
+| `pyproject.toml` / `uv.lock` | `uv add --dev pyyaml` (aprobado; si SPEC-002 ya la añadió, no se toca). |
 | `tests/unit/test_plantillas_github.py` | **Opcional** (ver §5). Usa el fixture `raiz_repo` de `tests/conftest.py` (SPEC-001). |
 
 No hay código de producción ni firmas públicas nuevas en `src/`.
@@ -84,7 +84,7 @@ contact_links:
 
 ## 5. Estrategia de pruebas
 Piso del backlog: **0**. AC-1…AC-8 se verifican por inspección y demo (tabla de abajo). Se
-propone, **opcional y sujeto a aprobación** (Pregunta abierta 2), un archivo de 4 pruebas
+incluye (**aprobado**, Pregunta abierta 2) un archivo de 4 pruebas
 AAA, sin red ni GPU, que requiere `uv add --dev pyyaml`:
 
 | Prueba (archivo::nombre) | Cubre |
@@ -107,7 +107,7 @@ Verificación manual (siempre):
 | Tras el merge: «New issue» muestra solo Historia, Bug y la guía; intentar enviar vacío | AC-1, AC-3, AC-4, AC-5 |
 | Lectura de `CONTRIBUTING.md` contra la lista de RF-6 | AC-2, AC-7, AC-8 |
 
-Total planeado: 0 pruebas obligatorias + 4 opcionales (piso del backlog: 0).
+Total planeado: 4 pruebas (piso del backlog: 0).
 
 ## 6. Cómo explicarlo en la sustentación
 - Al pulsar «New issue» GitHub muestra un formulario que no deja crear la historia sin
